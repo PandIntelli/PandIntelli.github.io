@@ -1,0 +1,747 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/master/img/aquaicon.png">
+  <link rel="icon" href="/master/img/aquaicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Pand">
+  <meta name="keywords" content="Hexo, Contrastive Learning, Research">
+  
+    <meta name="description" content="想学习一下NLP领域的Self-attention机制但是看了一些文章没看太懂, 于是看了这篇非局部神经网络。Self-attention可以被视为是一种non-local的特殊情况。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="论文阅读：Non-local Neural Networks">
+<meta property="og:url" content="https://pandintelli.github.io/master/2022/02/22/Non-local-Neural-Network/index.html">
+<meta property="og:site_name" content="Pand&#96;s Blog">
+<meta property="og:description" content="想学习一下NLP领域的Self-attention机制但是看了一些文章没看太懂, 于是看了这篇非局部神经网络。Self-attention可以被视为是一种non-local的特殊情况。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pandintelli.github.io/master/index_img/Non-localNN.png">
+<meta property="article:published_time" content="2022-02-22T13:36:54.000Z">
+<meta property="article:modified_time" content="2023-04-21T11:53:18.440Z">
+<meta property="article:author" content="Pand">
+<meta property="article:tag" content="Attention">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://pandintelli.github.io/master/index_img/Non-localNN.png">
+  
+  
+  
+  <title>论文阅读：Non-local Neural Networks - Pand`s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/master/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/master/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/master/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"pandintelli.github.io","root":"/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/master/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/master/js/utils.js" ></script>
+  <script  src="/master/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/master/">
+      <strong>Pand`s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/master/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">论文阅读：Non-local Neural Networks</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-02-22 21:36" pubdate>
+          2022年2月22日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          25 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">论文阅读：Non-local Neural Networks</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h3 id="Local-amp-Non-local"><a href="#Local-amp-Non-local" class="headerlink" title="Local &amp; Non-local"></a>Local &amp; Non-local</h3><p>Local这个词主要是针对感受野(receptive field)来说的。以卷积操作为例，它的感受野大小就是卷积核大小，而我们一般都选用3*3，5*5之类的卷积核，它们只考虑局部区域，因此都是local的运算。同理，池化(Pooling)也是。相反的，non-local指的就是感受野可以很大，而不是一个局部领域。</p>
+<p>那我们碰到过什么non-local的操作吗？有的，全连接就是non-local的，而且是global的。但是全连接带来了大量的参数，给优化带来困难。这也是深度学习(主要指卷积神经网络)近年来流行的原因，考虑局部区域，参数大大减少了，能够训得动了。</p>
+<p>那我们为什么还需要non-local？</p>
+<p>我们知道，卷积层的堆叠可以增大感受野，但是如果看特定层的卷积核在原图上的感受野，它毕竟是有限的。这是local运算不能避免的。然而有些任务，它们可能需要原图上更多的信息，比如attention。如果在某些层能够引入全局的信息，就能很好地解决local操作无法看清全局的情况，为后面的层带去更丰富的信息。</p>
+<h3 id="公式"><a href="#公式" class="headerlink" title="公式"></a>公式</h3><p>A generic non-local operation in deep neural networks.<br>$$<br>y_i&#x3D;\frac{1}{\mathcal{C}(x)}\sum\limits_{\forall j}f(x_i,x_j)g(x_j)<br>$$<br>这里 $i$ 是输出位置的索引，$j$ 是所有可能的位置。$x$ 是输入信号，$y$ 是和 $x$ 具有相同大小的输出信号。$f(\cdot)$ 计算 $i$ 和所有 $j$ 之间的相关性。一元函数 $g(\cdot)$ 计算位置 $j$ 作为输入信号的表示。最后的输出由 $\mathcal{C}(x)$ normalize。</p>
+<h3 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h3><h4 id="Gaussian"><a href="#Gaussian" class="headerlink" title="Gaussian"></a>Gaussian</h4><p>$$<br>f(x_i,x_j)&#x3D;exp(x_i^Tx_j)<br>$$</p>
+<p>这里 $x_i^Tx_j$ 是点乘相似度。规范化因子 $\mathcal{C}(x)&#x3D;\sum_{\forall j}f(x_i,x_j)$。<br>$$<br>y_i&#x3D;\frac{1}{\sum_{\forall j}f(x_i,x_j)}\sum\limits_{\forall j}exp(x_i^Tx_j)g(x_j)<br>$$</p>
+<h4 id="Embedded-Gaussian"><a href="#Embedded-Gaussian" class="headerlink" title="Embedded Gaussian"></a>Embedded Gaussian</h4><p>Gaussian 公式的扩展，在嵌入空间 (embedding space) 中计算相似度。<br>$$<br>f(x_i,x_j)&#x3D;exp(\theta(x_i)^T\phi(x_j))<br>$$<br>其中 $\theta(x_i)&#x3D;W_\theta x_i$，$\phi(x_j)&#x3D;W_\phi x_j$。规范化因子 $\mathcal{C}(x)&#x3D;\sum_{\forall j}f(x_i,x_j)$。<br>$$<br>y_i&#x3D;\frac{1}{\sum_{\forall j}f(x_i,x_j)}\sum\limits_{\forall j}exp(\theta(x_i)^T\phi(x_j))g(x_j)<br>$$<br>self-attention 可以视为该公式的扩展，$\frac{1}{\mathcal{C}(x)}f(x_i,x_j)$ 变为 $j$ 维的 softmax 计算：<br>$$<br>y&#x3D;softmax(x^TW^T_\theta W_\phi x)g(x)<br>$$</p>
+<h4 id="Dot-product"><a href="#Dot-product" class="headerlink" title="Dot product"></a>Dot product</h4><p>$$<br>f(x_i,x_j)&#x3D;\theta(x_i)^T\phi(x_j)<br>$$</p>
+<p>规范化因子 $\mathcal{C}(x)&#x3D;N$。$N$ 是 x 的维度而不是 $f(\cdot)$ 的和。</p>
+<p>这种计算方法简化了梯度计算。</p>
+<blockquote>
+<p>A normalization like this is necessary because the input can have variable size.</p>
+</blockquote>
+<p>因为这样，输入可以有一个可变的大小，这种规范化是必要的。<br>$$<br>y&#x3D;\frac{1}{N}\sum\limits_{\forall j}(\theta(x_i)^T\phi(x_j))g(x_j)<br>$$</p>
+<h4 id="Concatenation"><a href="#Concatenation" class="headerlink" title="Concatenation"></a>Concatenation</h4><p>$$<br>f(x_i,x_j)&#x3D;\text{ReLU}(\textbf{w}_f^T[\theta(x_i),\phi(x_j)])<br>$$</p>
+<p>这里 $[\cdot,\cdot]$ 表示 concatenation，$\textbf{w}<em>f$ 是把连接向量映射成标量的权重向量。规范化因子 $\mathcal{C}(x)&#x3D;N$。<br>$$<br>y&#x3D;\frac{1}{N}\sum\limits</em>{\forall j}(\text{ReLU}(\textbf{w}_f^T[\theta(x_i),\phi(x_j)]))g(x_j)<br>$$</p>
+<ul>
+<li>后两种选择的归一化系数$\mathcal{C}(x)$选择为$x$的点数，只是为了简化计算，同时，还能保证对任意尺寸的输入，不会产生数值上的尺度伸缩。</li>
+<li>Embedding的实现方式，以图像为例，在文章中都采用1*1的卷积，也就是 $\theta$ 和 $\phi$ 都是卷积操作。</li>
+</ul>
+<p>为了能让non-local操作作为一个组件，可以直接插入任意的神经网络中，作者把non-local设计成residual block的形式，让non-local操作去学x的residual：<br>$$<br>\textbf{z}_i&#x3D;W_z \textbf{y}_i+\textbf{x}_i<br>$$<br>$W_z$ 实际上是一个卷积操作，它的输出 channel 和 $\textbf{x}$ 一致。这样一来，non-local 操作就可以作为一个组件，组装到任意卷积神经网络中。</p>
+<h3 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h3><p>$f(\cdot)$ 的计算其实是相似性计算，可以转化成矩阵运算。整个 non-local 运算可以化为矩阵乘法运算 + 卷积运算，如图所示，其中 oc 为 output_channels。</p>
+<img src="network.png" srcset="/master/img/loading.gif" lazyload/>
+
+<p>原文考虑的是T帧的视频为例，这里以一个batch的图像、$f(\cdot)$选为embedded Gaussian为例，对于其他形式的相似性度量，可以类似地化为矩阵操作。N 是 batchsize，H,W 是高和宽，C 是 channel。</p>
+<p>左边 softmax 之前的部分都是为了计算相似度，右边卷积计算之后直接和相似度进行相乘。</p>
+<h3 id="Relations"><a href="#Relations" class="headerlink" title="Relations"></a>Relations</h3><h4 id="与全连接层的联系"><a href="#与全连接层的联系" class="headerlink" title="与全连接层的联系"></a>与全连接层的联系</h4><ul>
+<li>全连接层的权重在输入与输出之间，而 non-local 计算的是输入层之间的相互关系。</li>
+</ul>
+<ul>
+<li>g是identity函数，$g(x_i)&#x3D;x_i$。</li>
+<li>归一化系数为1。归一化系数跟输入无关，全连接层不能处理任意尺寸的输入。</li>
+</ul>
+<h4 id="与-Self-attention-的联系"><a href="#与-Self-attention-的联系" class="headerlink" title="与 Self-attention 的联系"></a>与 Self-attention 的联系</h4><p>Embedding 的 1*1 卷积操作可以看成矩阵乘法。<br>$$<br>\begin{aligned}<br>    \theta(x_i)&#x3D;W_\theta\cdot x_i &amp;\Longrightarrow \theta(x)&#x3D;W_\theta\cdot x\<br>    \phi(x_j)&#x3D;W_\phi\cdot x_j &amp;\Longrightarrow \phi(x)&#x3D;W_\phi\cdot x<br>\end{aligned}<br>$$<br>所以<br>$$<br>y&#x3D;softmax(x^TW^T_\theta W_\phi x)g(x)<br>$$</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/master/categories/Paper-Reading/" class="category-chain-item">Paper Reading</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/master/tags/Attention/">#Attention</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>论文阅读：Non-local Neural Networks</div>
+      <div>https://pandintelli.github.io/master/2022/02/22/Non-local-Neural-Network/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Pand</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年2月22日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/master/2022/02/23/ResNet/" title="论文阅读：Deep Residual Learning for Image Recognition">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">论文阅读：Deep Residual Learning for Image Recognition</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/master/2022/02/19/Python-decorator/" title="Python装饰器和functools.wraps简单解析">
+                        <span class="hidden-mobile">Python装饰器和functools.wraps简单解析</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      蜀ICP备2022001332号
+    </a>
+  </span>
+  
+    
+      <span>
+        <a
+          href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=51010702002729"
+          rel="nofollow noopener"
+          class="beian-police"
+          target="_blank"
+        >
+          
+            <span style="visibility: hidden; width: 0">|</span>
+            <img src="/master/img/police_beian.png" srcset="/master/img/loading.gif" lazyload alt="police-icon"/>
+          
+          <span>川公网安备 51010702002729号</span>
+        </a>
+      </span>
+    
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/master/js/events.js" ></script>
+<script  src="/master/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/master/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/master/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/master/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

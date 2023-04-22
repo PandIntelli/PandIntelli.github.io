@@ -1,0 +1,836 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/master/img/aquaicon.png">
+  <link rel="icon" href="/master/img/aquaicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Pand">
+  <meta name="keywords" content="Hexo, Contrastive Learning, Research">
+  
+    <meta name="description" content="t-distributed stochastic neighbor embedding (t-SNE) 是一种基于概率将高维数据降为低维的降维方法，通常被用于将高维数据进行2维或3维的可视化。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="t-SNE 可视化降维方法简介">
+<meta property="og:url" content="https://pandintelli.github.io/master/2022/01/05/t-SNE%E7%AE%80%E4%BB%8B/index.html">
+<meta property="og:site_name" content="Pand&#96;s Blog">
+<meta property="og:description" content="t-distributed stochastic neighbor embedding (t-SNE) 是一种基于概率将高维数据降为低维的降维方法，通常被用于将高维数据进行2维或3维的可视化。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pandintelli.github.io/master/index_img/IntroductionOf_tSNE_v1.png">
+<meta property="article:published_time" content="2022-01-05T01:27:38.000Z">
+<meta property="article:modified_time" content="2023-04-21T11:53:18.660Z">
+<meta property="article:author" content="Pand">
+<meta property="article:tag" content="t-SNE">
+<meta property="article:tag" content="Dimension Reduction">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://pandintelli.github.io/master/index_img/IntroductionOf_tSNE_v1.png">
+  
+  
+  
+  <title>t-SNE 可视化降维方法简介 - Pand`s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/master/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/master/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/master/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"pandintelli.github.io","root":"/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/master/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/master/js/utils.js" ></script>
+  <script  src="/master/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/master/">
+      <strong>Pand`s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/master/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">t-SNE 可视化降维方法简介</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-01-05 09:27" pubdate>
+          2022年1月5日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          6.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          54 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">t-SNE 可视化降维方法简介</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p><strong>t-distributed stochastic neighbor embedding (t-SNE)</strong><a href="#refer-anchor-1"><sup>[1]<sup></a> 是一种基于概率将高维数据降为低维的降维方法，通常被用于将高维数据进行2维或3维的可视化。</p>
+<p>传统的<strong>线性方法</strong>主要将<strong>不相似的点</strong>在低维表示中分开。</p>
+<blockquote>
+<p>PCA (Principle Components Analysis, 主成分分析)</p>
+<p>MDS (Multiple Dimensional Scaling, 多维缩放)</p>
+</blockquote>
+<p>对处于<strong>低维流形</strong>上的高维数据而言，更重要地是让<strong>相邻点</strong>在低维表示中保持相邻。<strong>非线性技术</strong>主要保持数据的<strong>局部结构</strong> (Locality)。</p>
+<blockquote>
+<p>Sammon mapping</p>
+<p>LLE (Locally Linear Embedding, 局部线性嵌入)</p>
+<p>LE (Laplacian Eigenmaps, 拉普拉斯特征映射)</p>
+<p>Isomap (Isometric Mapping, 等度量映射)</p>
+</blockquote>
+<p>和以上方法相同，<strong>t-SNE</strong>通过建立<strong>配对相似度</strong> (pairwise similarities)来进行低维重构。</p>
+<p>不同的是，<strong>t-SNE</strong>通过概率来建立配对相似度，而不是简单地通过距离建立。</p>
+<p>首先我们先介绍t-SNE的前身，SNE (Stochastic Neighbor Embedding, 随机近邻嵌入)</p>
+<h2 id="SNE"><a href="#SNE" class="headerlink" title="SNE"></a>SNE</h2><p>SNE首先通过概率来建立配对相似度。</p>
+<h4 id="配对相似度-基于条件概率"><a href="#配对相似度-基于条件概率" class="headerlink" title="配对相似度-基于条件概率"></a>配对相似度-基于条件概率</h4><p>给定一组高维数据点$x_1,x_2,\cdots,x_n$，$p_{j|i}$是$x_i$会将$x_j$选为邻居的条件概率。这里的比值是邻居和所有点的高斯分布概率密度之比。<br>$$<br>p_{j|i}&#x3D;\frac{exp(-||x_i-x_j||^2&#x2F;2\sigma_i^2)}{\sum\limits_{k\neq i}exp(-||x_i-x_k||^2&#x2F;2\sigma_i^2)}<br>$$<br>注意：1）分母即归一化。2）默认$p_{i|i}&#x3D;0$。3）每不同数据点$x_i$有不同的$\sigma_i$。其计算方式将在下面叙述。</p>
+<p>同样的，对于低维表示，定义同样的条件概率。不同的是，为了消除缩放对数据点的影响，同时也为了方便计算，这里指定$\sigma_i &#x3D; \frac{1}{\sqrt{2}}$。<br>$$<br>q_{j|i}&#x3D;\frac{exp(-||y_i-y_j||^2)}{\sum\limits_{k\neq i}exp(-||y_i-y_k||^2)}<br>$$<br>注意：1）若$\sigma_i$取其他值，也只影响缩放。</p>
+<p>则可以认为，如果建模正确，低维映射$y_i$和$y_j$的相似度应该和高维数据$x_i$和$x_j$的相似度相等。</p>
+<h4 id="损失函数-基于KL散度"><a href="#损失函数-基于KL散度" class="headerlink" title="损失函数-基于KL散度"></a>损失函数-基于KL散度</h4><p>基于这个想法，SNE意图找到一个可以减小$p_{j|i}$和$q_{j|i}$之间失配 (mismatch) 的低维表示。</p>
+<p>为了减少失配，首先需要方法来衡量它，SNE引入了<a href="#kl%E6%95%A3%E5%BA%A6">KL散度</a> (Kullback-Leibler divergences)<a href="#refer-anchor-2"><sup>[2]<sup></a> 来衡量失配，损失函数 (cost function) 如下：<br>$$<br>C&#x3D;\sum\limits_i KL(P_i||Q_i)&#x3D;\sum\limits_i\sum\limits_j p_{j|i}\log \frac{p_{j|i}}{q_{j|i}}<br>$$<br>定义了$C$后，SNE采用梯度下降的方法来学习到合适的$y_i$，对$y_i$的梯度为：<br>$$<br>\frac{\partial C}{\partial y_i}&#x3D;2\sum\limits_j(p_{j|i}-q_{j|i}+p_{i|j}-q_{i|j})(y_i-y_j)<br>$$<br>采用动量项来迭代更新$y_i$<br>$$<br>y_i^{(t)}&#x3D;y_i^{(t-1)}+\eta \frac{\partial C}{\partial y_i}+\alpha(t)(y_i^{(t-1)}-y_i^{(t-2)})<br>$$<br>至此，SNE的过程已经介绍完毕，通过计算条件概率来得到$P$，初始化$Y$后，计算$Q$。之后通过动量梯度下降来更新$Y$，得到计算结果。</p>
+<h4 id="选取-sigma-i-基于熵"><a href="#选取-sigma-i-基于熵" class="headerlink" title="选取$\sigma_i$-基于熵"></a>选取$\sigma_i$-基于熵</h4><p>在数据集中，不同类别数据点的分布密度往往不同，因此不能定制一个所有点都适用的$\sigma$。</p>
+<blockquote>
+<p>Every $\sigma_i$ is either set by hand or found by a simple binary search (<a href="#refer-anchor-3">Hinton and Roweis, 2003</a>) or by a very robust root-finding method (<a href="#refer-anchor-4">Vladymyrov and Carreira-Perpinan, 2013</a>)</p>
+</blockquote>
+<p>这里介绍一种基于熵来限制分布自由度的方法。</p>
+<p>熵增加，$\sigma_i$也增加，所以通过限制熵的大小来寻找合适的$\sigma_i$，让不同类别的数据点有一个大致相同的分布。定义困惑度 (perplexity) 如下<br>$$<br>Perp(P_i) &#x3D;2^{H(P_i)}&#x3D;2^{-\sum\limits_jp_{j|i}\log_2p_{j|i}}<br>$$<br>这里的$H(P_i)$是香农熵，通常指定的困惑值在5和50之间。</p>
+<p>由于$Perp(\cdot)$函数是单调函数，可以采用二分的方法来寻找$\sigma_i$。</p>
+<h4 id="SNE局限-Limitations"><a href="#SNE局限-Limitations" class="headerlink" title="SNE局限 (Limitations)"></a>SNE局限 (Limitations)</h4><ul>
+<li>Cost function 难以优化。偏导 $2\sum\limits_j(p_{j|i}-q_{j|i}+p_{i|j}-q_{i|j})(y_i-y_j)$ 难以计算。</li>
+<li>Crowding problem。在二维映射空间中，能容纳<strong>（高维空间中的）中等距离间隔点</strong>的空间，不会比能容纳<strong>（高维空间中的）相近点</strong>的空间大太多。所以高维空间中离得远的、近的点，在低维空间中都被塞在了一起，引起了拥挤问题。</li>
+</ul>
+<h2 id="t-SNE"><a href="#t-SNE" class="headerlink" title="t-SNE"></a>t-SNE</h2><p>t-SNE在SNE的基础上进行了改进，优化了SNE的Limitations。</p>
+<ul>
+<li>Cost function 难以优化 $\Longrightarrow$ 使用 Symmetric SNE。</li>
+<li>Crowding problem $\Longrightarrow$ 在低维嵌入上使用Student’s t-distribution 替代 Guassian distribution，同时也简化了cost function。</li>
+</ul>
+<p>下面，我们将分别针对这些优化进行介绍。</p>
+<h4 id="Symmetric-SNE"><a href="#Symmetric-SNE" class="headerlink" title="Symmetric SNE"></a>Symmetric SNE</h4><p>在高维空间中定义联合概率$p_{ij}$为对称条件概率：<br>$$<br>p_{ij}&#x3D;\frac{p_{j|i}+p_{i|j}}{2n}<br>$$<br>则cost function为：<br>$$<br>C&#x3D;KL(P||Q)&#x3D;\sum\limits_i\sum\limits_jp_{ij}\log\frac{p_{ij}}{q_{ij}}<br>$$<br>则简化后的偏导为：<br>$$<br>\frac{\partial C}{\partial y_i}&#x3D;4\sum\limits_j(p_{ij}-q_{ij})(y_i-y_j)<br>$$<br>偏导形式相对SNE来说更简单，计算速度更快。</p>
+<p>(注意：这只是Symmetric SNE的梯度公式，t-SNE的梯度公式类似，推导见后。)</p>
+<h4 id="Crowding-problem"><a href="#Crowding-problem" class="headerlink" title="Crowding problem"></a>Crowding problem</h4><p>“crowding problem”:</p>
+<blockquote>
+<p>The area of the two-dimensional map that is available to accommodate <strong>moderately distant datapoints</strong> will not be nearly large enough compared with the area available to accommodate <strong>nearby datapoints</strong>.</p>
+</blockquote>
+<p>在<a href="#sne%E5%B1%80%E9%99%90" title="limitations">SNE局限</a>中已经提到过，由于在低维空间中，能容纳的点一定比高维空间中的少，所以高维空间中远的、近的点，在低维空间中往往被塞在一起。</p>
+<p>这个问题其实是由于高斯概率分布造成的，高斯分布对于中等距离和较近距离的区分较少，也即，不能对近距离的点做出明显区分。因此，对于低维表示，t-SNE采用t分布来替换高斯分布。</p>
+<img src="gaussian_t_comparasion.png" srcset="/master/img/loading.gif" lazyload style="zoom:72%;" />
+
+<p>上图横轴表示距离，纵轴表示相似度，可以看到，对较大相似度的点，t分布在低维空间中的距离需要更小一点，对于低相似度的点，t分布在低维空间中需要的距离更远。</p>
+<p>所以，可以使同一簇内的点聚合地更紧密，不同簇之间的点更加疏远，解决crowding problem。</p>
+<h4 id="t-SNE配对相似度及损失函数"><a href="#t-SNE配对相似度及损失函数" class="headerlink" title="t-SNE配对相似度及损失函数"></a>t-SNE配对相似度及损失函数</h4><p>至此为止，我们可以定义联结概率 (joint probabilities) $q_{ij}$：<br>$$<br>q_{ij}&#x3D;\frac{(1+||y_i-y_j||^2)^{-1}}{\sum\limits_{k\neq l}(1+||y_k-y_l||^2)^{-1}}<br>$$<br>注意：和SNE的$q_{j|i}$公式相比，分母的求和号中，之前是$k\neq i$，表示仅排除 $i$ 自身项；现在是 $k\neq l$ ，表示排除所有自身项。也就是点对间所有两两之差。</p>
+<p>损失函数 (cost function) 为：<br>$$<br>\frac{\partial C}{\partial y_i}&#x3D;4\sum\limits_j(p_{ij}-q_{ij})(y_i-y_j)(1+||y_i-y_j||^2)^{-1}<br>$$</p>
+<p>推导详见 Maaten &amp; Hinton, 2008<a href="#refer-anchor-7"><sup>[4]<sup></a> Appendix A.</p>
+<p>至此，我们已经得到了t-SNE的损失函数，可以同样通过SNE中提到的动量迭代法来求解$Y$。</p>
+<p>接下来，对t-SNE的优势和局限性做一个总结。</p>
+<h2 id="优势及局限性"><a href="#优势及局限性" class="headerlink" title="优势及局限性"></a>优势及局限性</h2><p>Advantages：</p>
+<ul>
+<li>相较于LLE和LE等算法来说，t-SNE中点的相似度 (similarity) 由概率密度表示，不用KNN指定邻居，减少了参数量。</li>
+<li>每个点的局部邻居由概率密度表示，具有适应性 (相当于可以对每个点自定义邻居数量)。</li>
+<li>高维数据中高斯密度的应用让t-SNE保有局部特征的同时，维护全局结构。(不太懂)</li>
+</ul>
+<blockquote>
+<p>Gaussian kernel employed by t-SNE (in high-dimensional) defines a soft border between the local and global structure of the data.</p>
+</blockquote>
+<ul>
+<li>相较于SNE，t-SNE采用t分布后消除了一部分指数计算，计算效率更高，计算更快。</li>
+</ul>
+<p>Limitations：</p>
+<ul>
+<li>t-SNE不一定适用于超过三维的降维。对于超过三维的更高维度，t分布可能需要采用更高的自由度才更加合适。</li>
+</ul>
+<blockquote>
+<p>It is unclear t-SNE would perform on general <strong>Dimensionality Reduction</strong> for more than 3 dimensions. For such higher (than 3) dimensions, Student-t distribution with more degrees of freedom should be more appropriate.</p>
+</blockquote>
+<ul>
+<li>t-SNE也是通过数据的局部结构来执行降维任务的，因此可能对某些高维数据失效 (数据本身就是高维的，无法找到一种恰当的低维表示)</li>
+</ul>
+<blockquote>
+<p>t-SNE reduces the dimensionality of data mainly based on local properties of the data which means it would fail in data which has intrinsically high dimensional structure (<strong>curse of dimensionality</strong>).</p>
+</blockquote>
+<ul>
+<li>t-SNE的损失函数不是凸函数，因此在构造解的时候不会有固定解，而且没有一种有效且固定的解法，只能通过迭代求解。</li>
+</ul>
+<h2 id="关联概念"><a href="#关联概念" class="headerlink" title="关联概念"></a>关联概念</h2><h3 id="KL散度"><a href="#KL散度" class="headerlink" title="KL散度"></a>KL散度</h3><p>上文中提到的KL散度是一种衡量概率差别的方法，是两个概率分布$P$和$Q$差别的<strong>非对称</strong>度量。</p>
+<blockquote>
+<p>KL散度 (Kullback-Leibler divergence，简称KLD)，在讯息系统中称为相对熵 (relative entropy)<a href="#refer-anchor-2"><sup>[2]<sup></a>。</p>
+</blockquote>
+<h4 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h4><p>对于离散随机变量，它的概率分布$P$和$Q$的KL散度可按下式定义为<br>$$<br>D_{KL}(P||Q)&#x3D;\sum\limits_iP(i)\ln\frac{P(i)}{Q(i)}<br>$$<br>即按概率$P$求得的$P$和$Q$的对数商的平均值。KL散度仅当概率$P$和$Q$各自总和均为1，且对于任何$i$皆满足$Q(i)&gt;0$以及$P(i)&gt;0$时才有定义。</p>
+<h4 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h4><p>KLD的值为非负数：<br>$$<br>D_{KL}(P||Q)\ge 0<br>$$<br>当且仅当$P&#x3D;Q$时$D_{KL}(P||Q)$为零。</p>
+<p>虽然从直觉上KL散度是个度量或距离函数，但是它实际上并不是一个真正的度量或距离。因为KL散度具有不对称性：<br>$$<br>D_{KL}(P||Q)\neq D_{KL}(Q||P)<br>$$</p>
+<h3 id="Student’s-t-distribution"><a href="#Student’s-t-distribution" class="headerlink" title="Student’s t-distribution"></a>Student’s t-distribution</h3><p><strong>学生t分布</strong> (Student’s t-distribution)，简称<strong>t分布</strong>，在概率论及统计学中用于根据小样本来估计总体呈正态分布且标准差未知的期望值<a href="#refer-anchor-6"><sup>[3]<sup></a>。</p>
+<p>其概率分布密度函数 (Probability Density Function, PDF) 为<br>$$<br>f(t)&#x3D;\frac{\Gamma(\frac{v+1}{2})}{\sqrt{v\pi}\Gamma(\frac{v}{2})}(1+\frac{t^2}{v})^{-\frac{v+1}{2}}<br>$$<br>其中 $v$ 是自由度 。</p>
+<p>特殊情况，当 $v&#x3D;1$ 时<br>$$<br>f(t)&#x3D;\frac{1}{\pi(1+t^2)}<br>$$<br>这种概率分布也叫作柯西分布 (Cauchy distribution)。在t-SNE中用到的也是柯西分布。</p>
+<p>特殊情况，当 $v&#x3D;\infty$ 时<br>$$<br>f(t)&#x3D;\frac{1}{\sqrt{2\pi}}e^{-\frac{t^2}{2}}<br>$$<br>称为高斯&#x2F;正态分布。</p>
+<p>t分布的概率密度图如下图所示。</p>
+<img src="student_t_pdf.png" srcset="/master/img/loading.gif" lazyload alt="Student's t-distribution" style="zoom:30%;" />
+
+
+
+
+
+<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><div id="refer-anchor-1"><div>
+- [1] [Wikipedia: t-distributed stochastic neighbor embedding](https://en.wikipedia.org/wiki/T-distributed_stochastic_neighbor_embedding)
+
+<div id="refer-anchor-2"><div>
+- [2] [Wikipedia: Kullback–Leibler divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence)
+
+<div id="refer-anchor-6"><div>
+- [3] [Wikipedia: Student's t-distribution](https://en.wikipedia.org/wiki/Student%27s_t-distribution)
+
+<div id="refer-anchor-7"><div>
+- [4] Van der Maaten L, Hinton G. Visualizing data using t-SNE[J]. Journal of machine learning research, 2008, 9(11).
+
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><div id="refer-anchor-3"><div>
+- [1] Hinton G, Roweis S T. Stochastic neighbor embedding[C]//NIPS. 2002, 15: 833-840.
+
+<div id="refer-anchor-4"><div>
+- [2] Vladymyrov M, Carreira-Perpinan M. Entropic affinities: Properties and efficient numerical computation[C]//International conference on machine learning. PMLR, 2013: 477-485.
+
+<div id="refer-anchor-5"><div>
+- [3] [论文笔记：Visualizing data using t-SNE](https://psubnwell.github.io/2017/12/01/paper-note-t-sne/)
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/master/categories/Representation-Learning/" class="category-chain-item">Representation Learning</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/master/tags/t-SNE/">#t-SNE</a>
+      
+        <a href="/master/tags/Dimension-Reduction/">#Dimension Reduction</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>t-SNE 可视化降维方法简介</div>
+      <div>https://pandintelli.github.io/master/2022/01/05/t-SNE简介/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Pand</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年1月5日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/master/2022/01/09/Blog-Setup/" title="基于Hexo的本地博客搭建">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">基于Hexo的本地博客搭建</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/master/2021/12/29/subplot/" title="subplot">
+                        <span class="hidden-mobile">subplot</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      蜀ICP备2022001332号
+    </a>
+  </span>
+  
+    
+      <span>
+        <a
+          href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=51010702002729"
+          rel="nofollow noopener"
+          class="beian-police"
+          target="_blank"
+        >
+          
+            <span style="visibility: hidden; width: 0">|</span>
+            <img src="/master/img/police_beian.png" srcset="/master/img/loading.gif" lazyload alt="police-icon"/>
+          
+          <span>川公网安备 51010702002729号</span>
+        </a>
+      </span>
+    
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/master/js/events.js" ></script>
+<script  src="/master/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/master/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/master/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/master/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

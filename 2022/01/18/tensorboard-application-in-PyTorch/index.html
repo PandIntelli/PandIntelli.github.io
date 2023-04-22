@@ -1,0 +1,871 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/master/img/aquaicon.png">
+  <link rel="icon" href="/master/img/aquaicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Pand">
+  <meta name="keywords" content="Hexo, Contrastive Learning, Research">
+  
+    <meta name="description" content="Tensorboard 原本是 tensorflow 的可视化工具，pytorch 从1.2.0开始支持tensorboard。使用 tensorboard，我们可以在 TensorBoard UI 的框架内把 PyTorch 的模型和数据记录到文件夹内。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch 中 TensorBoard 可视化模块应用">
+<meta property="og:url" content="https://pandintelli.github.io/master/2022/01/18/tensorboard-application-in-PyTorch/index.html">
+<meta property="og:site_name" content="Pand&#96;s Blog">
+<meta property="og:description" content="Tensorboard 原本是 tensorflow 的可视化工具，pytorch 从1.2.0开始支持tensorboard。使用 tensorboard，我们可以在 TensorBoard UI 的框架内把 PyTorch 的模型和数据记录到文件夹内。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pandintelli.github.io/master/index_img/tensorboard.png">
+<meta property="article:published_time" content="2022-01-18T11:03:19.000Z">
+<meta property="article:modified_time" content="2023-04-21T11:53:18.660Z">
+<meta property="article:author" content="Pand">
+<meta property="article:tag" content="PyTorch">
+<meta property="article:tag" content="Python">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://pandintelli.github.io/master/index_img/tensorboard.png">
+  
+  
+  
+  <title>PyTorch 中 TensorBoard 可视化模块应用 - Pand`s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/master/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/master/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/master/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"pandintelli.github.io","root":"/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/master/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/master/js/utils.js" ></script>
+  <script  src="/master/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/master/">
+      <strong>Pand`s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/master/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">PyTorch 中 TensorBoard 可视化模块应用</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-01-18 19:03" pubdate>
+          2022年1月18日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          6.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          53 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">PyTorch 中 TensorBoard 可视化模块应用</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Tensorboard 原本是 tensorflow 的可视化工具，pytorch 从1.2.0开始支持tensorboard。之前的版本也可以使用tensorboardX 代替。它在 PyTorch 中的模块为 <code>torch.utils.tensorboard</code>。</p>
+<p>使用 tensorboard，我们可以在 TensorBoard UI 的框架内把 PyTorch 的模型和数据记录到文件夹内。</p>
+<p>支持的可视化有：标量，图片，直方图，图表，嵌入，Caffe 2 nets 和 blobs。</p>
+<blockquote>
+<p>Scalars, images, histograms, graphs, and embedding visualizations are all supported for PyTorch models and tensors as well as Caffe2 nets and blobs.</p>
+</blockquote>
+<p>Tensorboard 的工作流程为：</p>
+<ul>
+<li>将代码运行过程中的数据写入一个文件夹中。(由代码中的 SummaryWriter 完成)</li>
+<li>读取这个文件夹中的数据，用浏览器显示出来。(在命令行运行 tensorboard 完成)</li>
+</ul>
+<p>接下来将分别介绍 SummaryWriter 和命令行 tensorboard 的使用方法。</p>
+<h2 id="SummaryWriter"><a href="#SummaryWriter" class="headerlink" title="SummaryWriter"></a>SummaryWriter</h2><p>一个简单实例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> torch.utils.tensorboard <span class="hljs-keyword">import</span> SummaryWriter<br><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br><br>writer = SummaryWriter()<br><br><span class="hljs-keyword">for</span> n_iter <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">100</span>):<br>    writer.add_scalar(<span class="hljs-string">&#x27;Loss/train&#x27;</span>, np.random.random(), n_iter)<br>    writer.add_scalar(<span class="hljs-string">&#x27;Loss/test&#x27;</span>, np.random.random(), n_iter)<br>    writer.add_scalar(<span class="hljs-string">&#x27;Accuracy/train&#x27;</span>, np.random.random(), n_iter)<br>    writer.add_scalar(<span class="hljs-string">&#x27;Accuracy/test&#x27;</span>, np.random.random(), n_iter)<br></code></pre></td></tr></table></figure>
+
+<p>可以看到，首先创建 <code>SummaryWriter</code> 的实例来对写入文件夹等等进行总体控制，然后再通过实例写入。<code>SummaryWriter</code> 的初始化参数如下：</p>
+<ul>
+<li><code>log_dir</code> (string) - 保存目录位置。默认为 <code>runs/CURRENT_DATETIME_HOSTNAME</code>，因为每次运行的时间都会改变，所以每次都会写入新文件夹。平常使用时可以使用层级结构，如 <code>runs/exp1</code>，<code>runs/exp2</code>，方便对实验进行比较。</li>
+<li><code>purge_step</code> (int) - 当 log 在 $T+X$ 步崩溃导致意外终止，然后在 $T$ 步重启时，可以指定 <code>purge_step</code>。大于等于 $T$ 步的数据会在 TensorBoard 里被清除然后隐藏。注意重启的实验和崩溃的实验应该指定同一 <code>log_dir</code> 文件目录。</li>
+</ul>
+<h2 id="命令行-tensorboard-可视化"><a href="#命令行-tensorboard-可视化" class="headerlink" title="命令行 tensorboard 可视化"></a>命令行 tensorboard 可视化</h2><p>常用的命令就两个参数 <code>--logdir</code> 和 <code>--port</code>。</p>
+<ul>
+<li><code>logdir</code>：需要可视化的目录位置。</li>
+<li><code>port</code>：tensorboard 可视化显示的 localhost 端口。</li>
+</ul>
+<p>示例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">tensorboard --logdir=./runs --port <span class="hljs-number">4000</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="写数据方法"><a href="#写数据方法" class="headerlink" title="写数据方法"></a>写数据方法</h2><p>就像在 <code>SummaryWriter</code> 中展示的，tensorboard 通过 <code>SummaryWriter</code> 的各种方法来向目录文件中写入数据，除了 <code>add_scalar</code> 方法外，还有许多方法，本节将一一进行介绍。</p>
+<h3 id="add-scalar"><a href="#add-scalar" class="headerlink" title="add_scalar"></a>add_scalar</h3><p>将标量数据添加到 summary。</p>
+<blockquote>
+<p>add_scalar(tag, scalar_value, global_step&#x3D;None)</p>
+</blockquote>
+<ul>
+<li>tag：数据 ID。</li>
+<li>scalar_value：需要存储的值。</li>
+<li>global_step：全局的步骤数。</li>
+</ul>
+<p>实例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> torch.utils.tensorboard <span class="hljs-keyword">import</span> SummaryWriter<br>writer = SummaryWriter()<br>x = <span class="hljs-built_in">range</span>(<span class="hljs-number">100</span>)<br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> x:<br>    writer.add_scalar(<span class="hljs-string">&#x27;y=2x&#x27;</span>, i * <span class="hljs-number">2</span>, i)<br>writer.close()<br></code></pre></td></tr></table></figure>
+
+<h3 id="add-scalars"><a href="#add-scalars" class="headerlink" title="add_scalars"></a>add_scalars</h3><p>批量添加标量数据到 summary。</p>
+<blockquote>
+<p>add_scalars(main_tag, tag_scalar_dict, global_step&#x3D;None)</p>
+</blockquote>
+<ul>
+<li>main_tag：所有 tag 的主标签。</li>
+<li>tag_scalar_dict：存储的标签和值的键值对。</li>
+<li>global_step：全局的步骤数。</li>
+</ul>
+<p>实例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> torch.utils.tensorboard <span class="hljs-keyword">import</span> SummaryWriter<br><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br>writer = SummaryWriter()<br>r = <span class="hljs-number">5</span><br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">100</span>):<br>    writer.add_scalars(<span class="hljs-string">&#x27;run_14h&#x27;</span>, &#123;<span class="hljs-string">&#x27;xsinx&#x27;</span>:i*np.sin(i/r),<br>                                    <span class="hljs-string">&#x27;xcosx&#x27;</span>:i*np.cos(i/r),<br>                                    <span class="hljs-string">&#x27;tanx&#x27;</span>: np.tan(i/r)&#125;, i)<br>writer.close()<br></code></pre></td></tr></table></figure>
+
+<p>注意，该方法存储时不是将 xsinx, xcosx, tanx 存储在 run_14h 这个 section 下，而是在主文件夹下将三个值存入 run_14h_xsinx, run_14h_xcosx, run_14h_tanx 文件夹。</p>
+<p>如果想存储在一个 section 下，还是使用 add_scalar 方法，如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">writer.add_scalar(<span class="hljs-string">&#x27;Loss/loss1&#x27;</span>, loss1, step)<br>writer.add_scalar(<span class="hljs-string">&#x27;Loss/loss2&#x27;</span>, loss2, step)<br></code></pre></td></tr></table></figure>
+
+<h3 id="add-histogram"><a href="#add-histogram" class="headerlink" title="add_histogram"></a>add_histogram</h3><p>将直方图添加到 summary。</p>
+<blockquote>
+<p>add_histogram(tag, values, global_step)</p>
+</blockquote>
+<ul>
+<li>tag：数据 ID。</li>
+<li>values：建立直方图的值。(type 为 <code>torch.Tensor</code> 或者 <code>numpy.array</code>)</li>
+<li>global_step：全局的步骤数。</li>
+</ul>
+<p>实例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> torch.utils.tensorboard <span class="hljs-keyword">import</span> SummaryWriter<br><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br>writer = SummaryWriter()<br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">10</span>):<br>    x = np.random.random(<span class="hljs-number">1000</span>)<br>    writer.add_histogram(<span class="hljs-string">&#x27;distribution centers&#x27;</span>, x + i, i)<br>writer.close()<br></code></pre></td></tr></table></figure>
+
+<h3 id="add-image"><a href="#add-image" class="headerlink" title="add_image"></a>add_image</h3><p>将图片信息添加到 summary。注意需要安装 <code>pillow</code> 包。</p>
+<blockquote>
+<p>add_image(tag, img_tensor, global_step&#x3D;None, dataformats&#x3D;’CHW’)</p>
+</blockquote>
+<ul>
+<li><p>tag：数据 ID。</p>
+</li>
+<li><p>img_tensor：图片数据。</p>
+</li>
+<li><p>global_step：全局的步骤数。</p>
+</li>
+<li><p>dataformats：数据格式，如 <code>CHW</code>, <code>HWC</code>, <code>HW</code>。<code>H</code> 为高, <code>W</code>为宽, <code>C</code> 为通道数。</p>
+</li>
+</ul>
+<p>Shape：</p>
+<p><code>img_tensor</code> 默认为 $(3, H,W)$。可以使用 <code>torchvision.utils.make_grid()</code> 把一个 <code>batch</code> 的 <code>tensor</code> 转换成 $3\times H\times W$ 的格式。如果 <code>img_tensor</code> 为其他格式，需要更改 <code>dataformats</code> 为对应的格式。</p>
+<p>实例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> torch.utils.tensorboard <span class="hljs-keyword">import</span> SummaryWriter<br><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br>img = np.zeros((<span class="hljs-number">3</span>, <span class="hljs-number">100</span>, <span class="hljs-number">100</span>))<br>img[<span class="hljs-number">0</span>] = np.arange(<span class="hljs-number">0</span>, <span class="hljs-number">10000</span>).reshape(<span class="hljs-number">100</span>, <span class="hljs-number">100</span>) / <span class="hljs-number">10000</span><br>img[<span class="hljs-number">1</span>] = <span class="hljs-number">1</span> - np.arange(<span class="hljs-number">0</span>, <span class="hljs-number">10000</span>).reshape(<span class="hljs-number">100</span>, <span class="hljs-number">100</span>) / <span class="hljs-number">10000</span><br><br>img_HWC = np.zeros((<span class="hljs-number">100</span>, <span class="hljs-number">100</span>, <span class="hljs-number">3</span>))<br>img_HWC[:, :, <span class="hljs-number">0</span>] = np.arange(<span class="hljs-number">0</span>, <span class="hljs-number">10000</span>).reshape(<span class="hljs-number">100</span>, <span class="hljs-number">100</span>) / <span class="hljs-number">10000</span><br>img_HWC[:, :, <span class="hljs-number">1</span>] = <span class="hljs-number">1</span> - np.arange(<span class="hljs-number">0</span>, <span class="hljs-number">10000</span>).reshape(<span class="hljs-number">100</span>, <span class="hljs-number">100</span>) / <span class="hljs-number">10000</span><br><br>writer = SummaryWriter()<br>writer.add_image(<span class="hljs-string">&#x27;my_image&#x27;</span>, img, <span class="hljs-number">0</span>)<br><br><span class="hljs-comment"># If you have non-default dimension setting, set the dataformats argument.</span><br>writer.add_image(<span class="hljs-string">&#x27;my_image_HWC&#x27;</span>, img_HWC, <span class="hljs-number">0</span>, dataformats=<span class="hljs-string">&#x27;HWC&#x27;</span>)<br>writer.close()<br></code></pre></td></tr></table></figure>
+
+<h3 id="add-images"><a href="#add-images" class="headerlink" title="add_images"></a>add_images</h3><p>将一个 batch 的图片数据添加到 summary。注意需要安装 <code>pillow</code> 包。</p>
+<blockquote>
+<p>add_images(<em>tag</em>, <em>img_tensor</em>, <em>global_step&#x3D;None</em>, <em>dataformats&#x3D;’NCHW’</em>)</p>
+</blockquote>
+<ul>
+<li><p>tag：数据 ID。</p>
+</li>
+<li><p>img_tensor：图片数据。</p>
+</li>
+<li><p>global_step：全局的步骤数。</p>
+</li>
+<li><p>dataformats：数据格式，如 <code>NCHW</code>, <code>NHWC</code>, <code>CHW</code>。<code>H</code> 为高, <code>W</code>为宽, <code>C</code> 为通道数。</p>
+</li>
+</ul>
+<p>Shape：</p>
+<p><code>img_tensor</code> 默认为 $(N,3, H,W)$。如果 <code>img_tensor</code> 为其他格式，需要更改 <code>dataformats</code> 为对应的格式。</p>
+<p>实例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> torch.utils.tensorboard <span class="hljs-keyword">import</span> SummaryWriter<br><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br><br>img_batch = np.zeros((<span class="hljs-number">16</span>, <span class="hljs-number">3</span>, <span class="hljs-number">100</span>, <span class="hljs-number">100</span>))<br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">16</span>):<br>    img_batch[i, <span class="hljs-number">0</span>] = np.arange(<span class="hljs-number">0</span>, <span class="hljs-number">10000</span>).reshape(<span class="hljs-number">100</span>, <span class="hljs-number">100</span>) / <span class="hljs-number">10000</span> / <span class="hljs-number">16</span> * i<br>    img_batch[i, <span class="hljs-number">1</span>] = (<span class="hljs-number">1</span> - np.arange(<span class="hljs-number">0</span>, <span class="hljs-number">10000</span>).reshape(<span class="hljs-number">100</span>, <span class="hljs-number">100</span>) / <span class="hljs-number">10000</span>) / <span class="hljs-number">16</span> * i<br><br>writer = SummaryWriter()<br>writer.add_images(<span class="hljs-string">&#x27;my_image_batch&#x27;</span>, img_batch, <span class="hljs-number">0</span>)<br>writer.close()<br></code></pre></td></tr></table></figure>
+
+<h3 id="add-figure"><a href="#add-figure" class="headerlink" title="add_figure"></a>add_figure</h3><p>将 matplotlib figure 渲染成图片并把它添加到 summary。注意需要安装 <code>matplotlib</code> 包。</p>
+<blockquote>
+<p>add_figure(tag, figure, global_step&#x3D;None, close&#x3D;True)</p>
+</blockquote>
+<ul>
+<li>tag：数据 ID。</li>
+<li>figure：figure 或者 figure 列表。</li>
+<li>global_step：全局的步骤数。</li>
+</ul>
+<h3 id="add-graph"><a href="#add-graph" class="headerlink" title="add_graph"></a>add_graph</h3><p>将图数据添加到 summary。</p>
+<blockquote>
+<p>add_graph(model, input_to_model&#x3D;None, verbose&#x3D;False)</p>
+</blockquote>
+<ul>
+<li>model (torch.nn.Module)：要画的模型。</li>
+<li>input_to_model：输入变量。(<code>torch.Tensor</code> 或者 <code>torch.Tensor</code> 的 <code>list</code>)</li>
+<li>verbose：是否把图结构输入到控制台。(没啥用, 输出的结果看不懂)</li>
+</ul>
+<h3 id="add-hparms"><a href="#add-hparms" class="headerlink" title="add_hparms"></a>add_hparms</h3><p>将一组超参数数据添加到 TensorBoard。</p>
+<blockquote>
+<p>add_hparams(hparam_dict, metric_dict, run_name)</p>
+</blockquote>
+<ul>
+<li><p>hparam_dict：字典中每个键值对，超参数和它对应的值。</p>
+</li>
+<li><p>metric_dcit：字典中每个 metric 和它对应的值。注意这里使用的值应该是 tensorboard 记录里唯一的值。(unique)</p>
+</li>
+<li><p>run_name：这次 run 的名称，会被包含在 <code>logdir</code> 文件夹下。如果 run_name 未被指定，则默认会使用当前时间戳。</p>
+</li>
+</ul>
+<p>实例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> torch.utils.tensorboard <span class="hljs-keyword">import</span> SummaryWriter<br><span class="hljs-keyword">with</span> SummaryWriter() <span class="hljs-keyword">as</span> w:<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">5</span>):<br>        w.add_hparams(&#123;<span class="hljs-string">&#x27;lr&#x27;</span>: <span class="hljs-number">0.1</span>*i, <span class="hljs-string">&#x27;bsize&#x27;</span>: i&#125;,<br>                      &#123;<span class="hljs-string">&#x27;hparam/accuracy&#x27;</span>: <span class="hljs-number">10</span>*i, <span class="hljs-string">&#x27;hparam/loss&#x27;</span>: <span class="hljs-number">10</span>*i&#125;)<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="数据读取"><a href="#数据读取" class="headerlink" title="数据读取"></a>数据读取</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> tensorboard.backend.event_processing <span class="hljs-keyword">import</span> event_accumulator<br> <br><span class="hljs-comment">#加载日志数据</span><br>ea=event_accumulator.EventAccumulator(<span class="hljs-string">&#x27;events.out.tfevents.1550994567.vvd-Inspiron-7557&#x27;</span>) <br>ea.Reload()<br><span class="hljs-built_in">print</span>(ea.scalars.Keys())<br> <br>val_psnr=ea.scalars.Items(<span class="hljs-string">&#x27;val_psnr&#x27;</span>)<br><span class="hljs-built_in">print</span>(<span class="hljs-built_in">len</span>(val_psnr))<br><span class="hljs-built_in">print</span>([(i.step,i.value) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> val_psnr])<br></code></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python">[<span class="hljs-string">&#x27;val_loss&#x27;</span>, <span class="hljs-string">&#x27;val_psnr&#x27;</span>, <span class="hljs-string">&#x27;loss&#x27;</span>, <span class="hljs-string">&#x27;psnr&#x27;</span>, <span class="hljs-string">&#x27;lr&#x27;</span>]<br><span class="hljs-number">29</span><br>[(<span class="hljs-number">0</span>, <span class="hljs-number">33.70820617675781</span>), (<span class="hljs-number">1</span>, <span class="hljs-number">34.52505874633789</span>), (<span class="hljs-number">2</span>, <span class="hljs-number">34.26629638671875</span>), (<span class="hljs-number">3</span>, <span class="hljs-number">35.47195053100586</span>), (<span class="hljs-number">4</span>, <span class="hljs-number">35.45940017700195</span>), (<span class="hljs-number">5</span>, <span class="hljs-number">35.336708068847656</span>), (<span class="hljs-number">6</span>, <span class="hljs-number">35.467647552490234</span>), (<span class="hljs-number">7</span>, <span class="hljs-number">35.919857025146484</span>), (<span class="hljs-number">8</span>, <span class="hljs-number">35.29727554321289</span>), (<span class="hljs-number">9</span>, <span class="hljs-number">35.63655471801758</span>), (<span class="hljs-number">10</span>, <span class="hljs-number">36.219871520996094</span>), (<span class="hljs-number">11</span>, <span class="hljs-number">36.178646087646484</span>), (<span class="hljs-number">12</span>, <span class="hljs-number">35.93777847290039</span>), (<span class="hljs-number">13</span>, <span class="hljs-number">35.587406158447266</span>), (<span class="hljs-number">14</span>, <span class="hljs-number">36.198944091796875</span>), (<span class="hljs-number">15</span>, <span class="hljs-number">36.241966247558594</span>), (<span class="hljs-number">16</span>, <span class="hljs-number">36.379913330078125</span>), (<span class="hljs-number">17</span>, <span class="hljs-number">36.28306198120117</span>), (<span class="hljs-number">18</span>, <span class="hljs-number">36.03053665161133</span>), (<span class="hljs-number">19</span>, <span class="hljs-number">36.20806121826172</span>), (<span class="hljs-number">20</span>, <span class="hljs-number">36.21710968017578</span>), (<span class="hljs-number">21</span>, <span class="hljs-number">36.42262268066406</span>), (<span class="hljs-number">22</span>, <span class="hljs-number">36.00306701660156</span>), (<span class="hljs-number">23</span>, <span class="hljs-number">36.4374885559082</span>), (<span class="hljs-number">24</span>, <span class="hljs-number">36.163787841796875</span>), (<span class="hljs-number">25</span>, <span class="hljs-number">36.53673553466797</span>), (<span class="hljs-number">26</span>, <span class="hljs-number">35.99557113647461</span>), (<span class="hljs-number">27</span>, <span class="hljs-number">36.96220016479492</span>), (<span class="hljs-number">28</span>, <span class="hljs-number">36.63676452636719</span>)]<br></code></pre></td></tr></table></figure>
+
+
+
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/master/categories/Coding/" class="category-chain-item">Coding</a>
+  
+  
+    <span>></span>
+    
+  <a href="/master/categories/Coding/PyTorch/" class="category-chain-item">PyTorch</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/master/tags/PyTorch/">#PyTorch</a>
+      
+        <a href="/master/tags/Python/">#Python</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>PyTorch 中 TensorBoard 可视化模块应用</div>
+      <div>https://pandintelli.github.io/master/2022/01/18/tensorboard-application-in-PyTorch/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Pand</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年1月18日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/master/2022/01/19/softmax-in-PyTorch/" title="PyTorch 中的 softmax 函数解读">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">PyTorch 中的 softmax 函数解读</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/master/2022/01/18/Python-logging/" title="Python 中 logging 模块的基础使用">
+                        <span class="hidden-mobile">Python 中 logging 模块的基础使用</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      蜀ICP备2022001332号
+    </a>
+  </span>
+  
+    
+      <span>
+        <a
+          href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=51010702002729"
+          rel="nofollow noopener"
+          class="beian-police"
+          target="_blank"
+        >
+          
+            <span style="visibility: hidden; width: 0">|</span>
+            <img src="/master/img/police_beian.png" srcset="/master/img/loading.gif" lazyload alt="police-icon"/>
+          
+          <span>川公网安备 51010702002729号</span>
+        </a>
+      </span>
+    
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/master/js/events.js" ></script>
+<script  src="/master/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/master/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/master/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/master/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

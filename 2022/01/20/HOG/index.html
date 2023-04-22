@@ -1,0 +1,759 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/master/img/aquaicon.png">
+  <link rel="icon" href="/master/img/aquaicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Pand">
+  <meta name="keywords" content="Hexo, Contrastive Learning, Research">
+  
+    <meta name="description" content="方向梯度直方图 (Histogram of oriented gradient, HOG) 是应用在计算机视觉和图像处理领域，用于目标检测的特征描述器。本文介绍它的实现原理和一个应用实例。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Histogram of oriented gradient, HOG">
+<meta property="og:url" content="https://pandintelli.github.io/master/2022/01/20/HOG/index.html">
+<meta property="og:site_name" content="Pand&#96;s Blog">
+<meta property="og:description" content="方向梯度直方图 (Histogram of oriented gradient, HOG) 是应用在计算机视觉和图像处理领域，用于目标检测的特征描述器。本文介绍它的实现原理和一个应用实例。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pandintelli.github.io/master/index_img/HOG.jpg">
+<meta property="article:published_time" content="2022-01-20T13:12:11.000Z">
+<meta property="article:modified_time" content="2023-04-21T11:53:17.330Z">
+<meta property="article:author" content="Pand">
+<meta property="article:tag" content="Hexo, Contrastive Learning, Research">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://pandintelli.github.io/master/index_img/HOG.jpg">
+  
+  
+  
+  <title>Histogram of oriented gradient, HOG - Pand`s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/master/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/master/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/master/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"pandintelli.github.io","root":"/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/master/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/master/js/utils.js" ></script>
+  <script  src="/master/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/master/">
+      <strong>Pand`s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/master/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">Histogram of oriented gradient, HOG</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-01-20 21:12" pubdate>
+          2022年1月20日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          2.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          24 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Histogram of oriented gradient, HOG</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>方向梯度直方图 (Histogram of oriented gradient, HOG) 是应用在计算机视觉和图像处理领域，用于目标检测的特征描述器。这项技术是用来计算局部图像梯度的方向信息的统计值。这种方法跟边缘方向直方图 (edge orientation histograms)、尺度不变特征变换 (scale-invariant feature transform descriptors) 以及形状上下文方法 (shape contexts) 有很多相似之处，但与它们的不同点是：HOG 描述器是在一个网格密集的大小统一的细胞单元 (dense grid of uniformly spaced cells) 上计算，而且为了提高性能，还采用了重叠的局部对比归一化 (overlapping local contrast normalization) 技术。</p>
+<p>方法首见于 <a target="_blank" rel="noopener" href="https://hal.inria.fr/file/index/docid/548512/filename/hog_cvpr2005.pdf">Histograms of Oriented Gradients for Human Detection</a>，发表在2005年 CVPR 上。</p>
+<p>算法计算步骤概览：</p>
+<ul>
+<li>图像预处理。伽马矫正 (减少亮度影响) 和灰度化 (也可以在RGB图上做，只不过对三通道颜色值计算，取梯度最大的) [可选]</li>
+<li>计算图像像素点梯度值，得到梯度图 (尺寸和原图同等大小)</li>
+<li>图像划分多个 cell，统计 cell 内梯度直方图</li>
+<li>将 $2\times 2$ 个 cell 联合成一个 block，对每个 block 做块内梯度归一化</li>
+</ul>
+<p>以下将分别介绍这几个步骤。</p>
+<h2 id="图像预处理"><a href="#图像预处理" class="headerlink" title="图像预处理"></a>图像预处理</h2><p>作用：gamma 矫正通常用于电视和监视器系统中重现摄像机拍摄的画面．在图像处理中也可用于调节图像的对比度，减少图像的光照不均和局部阴影。</p>
+<p><strong>原理</strong>： 通过非线性变换，让图像从曝光强度的线性响应变得更接近人眼感受的响应，也就是将漂白（相机曝光）或过暗（曝光不足）的图片，进行矫正。</p>
+<p>gamma 矫正公式：<br>$$<br>f(x)&#x3D;x^\gamma<br>$$<br>输出是输入的幂函数，指数为$\gamma$，典型的Gamma值是0.45。</p>
+<h2 id="计算图像像素梯度图"><a href="#计算图像像素梯度图" class="headerlink" title="计算图像像素梯度图"></a>计算图像像素梯度图</h2><p>对于一个像素点 $L(x,y)$ 来说，在水平方向和竖直方向有两个梯度 $g_x$ 和 $g_y$：<br>$$<br>g_x&#x3D;\frac{L(x+1,y)-L(x-1,y)}{2}\<br>g_y&#x3D;\frac{L(x,y+1)-L(x,y-1)}{2}<br>$$<br>总的梯度大小为：<br>$$<br>g&#x3D;\sqrt{g_x^2+g_y^2}<br>$$<br>梯度的方向为：<br>$$<br>\theta(x,y)&#x3D;\arctan {\frac{g_y}{g_x}}<br>$$<br>梯度方向取绝对值，因此得到的角度范围是 $[0°,180°]$。</p>
+<p>上面的计算过程，可以用下面的两个 kernel 函数很简单的实现。</p>
+<img src="sobel_kernel.jpg" srcset="/master/img/loading.gif" lazyload/>
+
+<p>我们也可以通过 OpenCV 中 size&#x3D;1 的 Sobel 算子来实现。代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python">gx = cv2.Sobel(img, cv2.CV_32F, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, ksize=<span class="hljs-number">1</span>)<br>gy = cv2.Sobel(img, cv2.CV_32F, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, ksize=<span class="hljs-number">1</span>)<br>mag, angle = cv2.cartToPolar(gx, gy, angleInDegrees=<span class="hljs-literal">True</span>)<br></code></pre></td></tr></table></figure>
+
+<h2 id="计算梯度直方图"><a href="#计算梯度直方图" class="headerlink" title="计算梯度直方图"></a>计算梯度直方图</h2><p>经过上一步计算，每个像素点会有两个值：梯度方向和梯度大小。</p>
+<p>但是，梯度大小和梯度方向图和原图大小相同，如果实际使用这些特征，会有两个问题：</p>
+<ul>
+<li>计算量很大</li>
+<li>特征稀疏，图中只有少量特征</li>
+</ul>
+<p>所以 HOG 特征选择联合 $8\times 8$ 大小的 cell 内部的像素，计算其梯度幅度和梯度方向的统计直方图。由此一来，需要计算的数值就大量减少了。</p>
+<p>梯度方向取值范围为 $[0°,180°]$，以每 $20°$ 一个单元，可以划分为9组。然后把 cell 内部的值先通过角度划分到对应的 bin 内，然后再把大小赋给这个 bin，具体如下图所示。</p>
+<img src="histogram_1.png" srcset="/master/img/loading.gif" lazyload/>
+
+<p>蓝圈角度为80°，划分到80的 bin，大小2，也赋给这个 bin。红圈角度10°，介于0和20之间，所以两个 bin 各分一半。</p>
+<p>这里有一个细节，如果角度大于160，那么我们要考虑均匀分配，如下图。</p>
+<img src="histogram_2.png" srcset="/master/img/loading.gif" lazyload/>
+
+<p>最终我们可以得到下面这样的直方图：</p>
+<img src="histogram_3.png" srcset="/master/img/loading.gif" lazyload/>
+
+<p>从上图可以看到，更多的点的梯度方向是倾向于0度和160度，也就是说这些点的梯度方向是向上或者向下，表明图像这个位置存在比较明显的横向边缘。因此HOG是对边角敏感的，由于这样的统计方法，也是对部分像素值变化不敏感的，所以能够适应不同的环境。</p>
+<p>至于为什么选取 $8\times 8$ 为一个单元格，是因为HOG特征当初设计时是用来做行人检测的。在行人图片中 $8\times 8$ 的矩阵足以捕获一些特征，比如脸部或者头部特征等。</p>
+<h2 id="Block-归一化"><a href="#Block-归一化" class="headerlink" title="Block 归一化"></a>Block 归一化</h2><p>目的：降低光照的影响。</p>
+<p>方法：向量的每一个值除以向量模长。</p>
+<p>HOG 在选取 $8\times 8$ 为一个 cell 的基础上，以 $2\times 2$ 个 cell 为一组，称为 block。每个 cell 有九个向量 (直方图)，那么 $2\times 2$ 个 cell 则有 36 个向量。</p>
+<h2 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h2><p>可以使用 sklearn-image 库中的 hog 函数很简单地实现求一个图片的 HOG，代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt<br><span class="hljs-keyword">import</span> cv2<br><span class="hljs-keyword">from</span> skimage.feature <span class="hljs-keyword">import</span> hog<br><span class="hljs-keyword">from</span> skimage <span class="hljs-keyword">import</span> data, exposure<br>image = cv2.imread(<span class="hljs-string">&#x27;./00000001.png&#x27;</span>)<br><br>fd, hog_image = hog(image, orientations=<span class="hljs-number">8</span>, pixels_per_cell=(<span class="hljs-number">16</span>, <span class="hljs-number">16</span>),<br>                    cells_per_block=(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>), visualize=<span class="hljs-literal">True</span>, multichannel=<span class="hljs-literal">True</span>)<br>fig, (ax1, ax2) = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">8</span>, <span class="hljs-number">4</span>), sharex=<span class="hljs-literal">True</span>, sharey=<span class="hljs-literal">True</span>)<br>ax1.axis(<span class="hljs-string">&#x27;off&#x27;</span>)<br>ax1.imshow(image, cmap=plt.cm.gray)<br>ax1.set_title(<span class="hljs-string">&#x27;Input image&#x27;</span>)<br><span class="hljs-comment"># Rescale histogram for better display</span><br>hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>))<br>ax2.axis(<span class="hljs-string">&#x27;off&#x27;</span>)<br>ax2.imshow(hog_image_rescaled, cmap=plt.cm.gray)<br>ax2.set_title(<span class="hljs-string">&#x27;Histogram of Oriented Gradients&#x27;</span>)<br>plt.show()<br></code></pre></td></tr></table></figure>
+
+<p>实现效果如下：</p>
+<img src="image1.png" srcset="/master/img/loading.gif" lazyload/>
+
+<img src="image2.png" srcset="/master/img/loading.gif" lazyload/>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li>[1] <a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E6%96%B9%E5%90%91%E6%A2%AF%E5%BA%A6%E7%9B%B4%E6%96%B9%E5%9B%BE">Wikipedia: 方向梯度直方图</a></li>
+<li>[2] <a target="_blank" rel="noopener" href="https://learnopencv.com/histogram-of-oriented-gradients/">Histogram of Oriented Gradients explained using OpenCV</a></li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/master/categories/Others/" class="category-chain-item">Others</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Histogram of oriented gradient, HOG</div>
+      <div>https://pandintelli.github.io/master/2022/01/20/HOG/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Pand</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年1月20日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/master/2022/02/17/BriefIntroductionOfDomainAdaptation/" title="Domain Adaptation 简介">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Domain Adaptation 简介</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/master/2022/01/20/Masked-Autoencoders-Are-Scalable-Vision-Learners/" title="论文阅读：Masked Autoencoders Are Scalable Vision Learners">
+                        <span class="hidden-mobile">论文阅读：Masked Autoencoders Are Scalable Vision Learners</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      蜀ICP备2022001332号
+    </a>
+  </span>
+  
+    
+      <span>
+        <a
+          href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=51010702002729"
+          rel="nofollow noopener"
+          class="beian-police"
+          target="_blank"
+        >
+          
+            <span style="visibility: hidden; width: 0">|</span>
+            <img src="/master/img/police_beian.png" srcset="/master/img/loading.gif" lazyload alt="police-icon"/>
+          
+          <span>川公网安备 51010702002729号</span>
+        </a>
+      </span>
+    
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/master/js/events.js" ></script>
+<script  src="/master/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/master/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/master/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/master/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

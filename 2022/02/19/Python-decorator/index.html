@@ -1,0 +1,804 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/master/img/aquaicon.png">
+  <link rel="icon" href="/master/img/aquaicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Pand">
+  <meta name="keywords" content="Hexo, Contrastive Learning, Research">
+  
+    <meta name="description" content="装饰器可以包装函数,在不改变函数体的前提下完成额外的功能。另外,可以借助 functools.wraps 模块在不生成新函数的情况下完成函数传参。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python装饰器和functools.wraps简单解析">
+<meta property="og:url" content="https://pandintelli.github.io/master/2022/02/19/Python-decorator/index.html">
+<meta property="og:site_name" content="Pand&#96;s Blog">
+<meta property="og:description" content="装饰器可以包装函数,在不改变函数体的前提下完成额外的功能。另外,可以借助 functools.wraps 模块在不生成新函数的情况下完成函数传参。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pandintelli.github.io/master/index_img/python_decorator.png">
+<meta property="article:published_time" content="2022-02-19T03:21:36.000Z">
+<meta property="article:modified_time" content="2023-04-21T11:53:18.450Z">
+<meta property="article:author" content="Pand">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="functools">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://pandintelli.github.io/master/index_img/python_decorator.png">
+  
+  
+  
+  <title>Python装饰器和functools.wraps简单解析 - Pand`s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/master/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/master/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/master/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"pandintelli.github.io","root":"/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/master/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/master/js/utils.js" ></script>
+  <script  src="/master/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/master/">
+      <strong>Pand`s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/master/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">Python装饰器和functools.wraps简单解析</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-02-19 11:21" pubdate>
+          2022年2月19日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          6.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          54 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Python装饰器和functools.wraps简单解析</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h3 id="装饰器实例"><a href="#装饰器实例" class="headerlink" title="装饰器实例"></a>装饰器实例</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">timer</span>(<span class="hljs-params">func</span>):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">wrapper</span>(<span class="hljs-params">*args, **kwargs</span>):<br>        start = time.time()<br>        func(*args, **kwargs) <span class="hljs-comment">#此处拿到了被装饰的函数func</span><br>        time.sleep(<span class="hljs-number">2</span>)<span class="hljs-comment">#模拟耗时操作</span><br>        long = time.time() - start<br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&#x27;共耗时<span class="hljs-subst">&#123;long&#125;</span>秒。&#x27;</span>)<br>    <span class="hljs-keyword">return</span> wrapper <span class="hljs-comment">#返回内层函数的引用</span><br><br><span class="hljs-meta">@timer</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">a, b</span>):<br>    <span class="hljs-built_in">print</span>(a+b)<br><br>add(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>) <span class="hljs-comment">#正常调用add</span><br></code></pre></td></tr></table></figure>
+
+<p>“@”是Python的语法糖，它的作用类似于：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">add = timer(add) <span class="hljs-comment">#此处返回的是timer.&lt;locals&gt;.wrapper函数引用</span><br>add(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)<br></code></pre></td></tr></table></figure>
+
+<p>装饰器的加载到执行的流程：</p>
+<p><strong>模块加载 -&gt;&gt; 遇到@，执行timer函数，传入add函数 -&gt;&gt; 生成timer.&lt;locals&gt;.wrapper函数并命名为add，其实是覆盖了原同名函数 -&gt;&gt; 调用add(1, 2) -&gt;&gt; 去执行timer.&lt;locals&gt;.wrapper(1, 2) -&gt;&gt; wrapper内部持有原add函数引用(func)，调用func(1, 2) -&gt;&gt;继续执行完wrapper函数</strong></p>
+<h3 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h3><p>对于上述实例，可以看做是对 add() 函数添加了一个名称为 timer() 的修饰，并将 add() 作为函数参数传给 timer。timer() 内部定义了新参数并接受 add() 的参数，再执行内部 return 的 wrapper 函数。</p>
+<h3 id="functools-wraps-解读"><a href="#functools-wraps-解读" class="headerlink" title="functools.wraps 解读"></a>functools.wraps 解读</h3><p>functools模块提供了一系列的高阶函数以及对可调用对象的操作，其中为人熟知的有reduce，partial，wraps等。</p>
+<p>为了保证被装饰器装饰后的函数还拥有原来的属性，wraps通过partial以及update_wrapper来实现。</p>
+<p>我们先来了解一下partial，partial用于部分应用一个函数，它基于一个函数创建一个可调用对象，把原函数的某些参数固定，调用时只需要传递未固定的参数即可。</p>
+<p>我们先看partial如何使用：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> functools<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">a, b</span>):<br>    <span class="hljs-built_in">print</span>(a + b)<br><br><br>add = functools.partial(add, <span class="hljs-number">1</span>)<br>add(<span class="hljs-number">2</span>)<br><br>输出：<span class="hljs-number">3</span><br></code></pre></td></tr></table></figure>
+
+<p>add函数原本接收两个参数a和b，经过partial包装之后，a参数的值被固定为了1，新的add对象（注意此处add已经是一个可调用对象，而非函数，下文分析源码会看到）只需要接收一个参数即可。</p>
+<p>通俗点说：<strong>就是把原函数的部分参数固定了初始值，新的调用只需要传递其它参数。</strong></p>
+<p>下面来分析partial的源码（Python3.7），只摘录了核心部分：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">partial</span>:<br>    <span class="hljs-string">&quot;&quot;&quot;New function with partial application of the given arguments</span><br><span class="hljs-string">    and keywords.</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br><br>    __slots__ = <span class="hljs-string">&quot;func&quot;</span>, <span class="hljs-string">&quot;args&quot;</span>, <span class="hljs-string">&quot;keywords&quot;</span>, <span class="hljs-string">&quot;__dict__&quot;</span>, <span class="hljs-string">&quot;__weakref__&quot;</span><br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__new__</span>(<span class="hljs-params">*args, **keywords</span>):<br>        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> args:<br>            <span class="hljs-keyword">raise</span> TypeError(<span class="hljs-string">&quot;descriptor &#x27;__new__&#x27; of partial needs an argument&quot;</span>)<br>        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(args) &lt; <span class="hljs-number">2</span>:<br>            <span class="hljs-keyword">raise</span> TypeError(<span class="hljs-string">&quot;type &#x27;partial&#x27; takes at least one argument&quot;</span>)<br>        cls, func, *args = args<br>        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-built_in">callable</span>(func):<br>            <span class="hljs-keyword">raise</span> TypeError(<span class="hljs-string">&quot;the first argument must be callable&quot;</span>)<br>        args = <span class="hljs-built_in">tuple</span>(args)<br><br>        <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(func, <span class="hljs-string">&quot;func&quot;</span>):<br>            args = func.args + args<br>            tmpkw = func.keywords.copy()<br>            tmpkw.update(keywords)<br>            keywords = tmpkw<br>            <span class="hljs-keyword">del</span> tmpkw<br>            func = func.func<br><br>        self = <span class="hljs-built_in">super</span>(partial, cls).__new__(cls)<br><br>        self.func = func<br>        self.args = args<br>        self.keywords = keywords<br>        <span class="hljs-keyword">return</span> self<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__call__</span>(<span class="hljs-params">*args, **keywords</span>):<br>        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> args:<br>            <span class="hljs-keyword">raise</span> TypeError(<span class="hljs-string">&quot;descriptor &#x27;__call__&#x27; of partial needs an argument&quot;</span>)<br>        self, *args = args<br>        newkeywords = self.keywords.copy()<br>        newkeywords.update(keywords)<br>        <span class="hljs-keyword">return</span> self.func(*self.args, *args, **newkeywords)<br></code></pre></td></tr></table></figure>
+
+<p>通过重写“_<em>new</em>__”方法，自定义对象实例化过程。</p>
+<p>1、元组拆包，获取到传入的原函数（func）和需要固定的参数（args）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">cls, func, *args = args<br></code></pre></td></tr></table></figure>
+
+<p>2、主要是为了支持嵌套调用，即add&#x3D;partial(partial(add,1),2)这种情况，可先看第三步，回过头再来看</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(func, <span class="hljs-string">&quot;func&quot;</span>):<br>    args = func.args + args<br>    tmpkw = func.keywords.copy()<br>    tmpkw.update(keywords)<br>    keywords = tmpkw<br>    <span class="hljs-keyword">del</span> tmpkw<br>    func = func.func<br></code></pre></td></tr></table></figure>
+
+<p>3、实例化partial对象，将传入的函数和参数设置为当前对象的属性</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python">self = <span class="hljs-built_in">super</span>(partial, cls).__new__(cls)<br><br>self.func = func<br>self.args = args<br>self.keywords = keywords<br><span class="hljs-keyword">return</span> self<br></code></pre></td></tr></table></figure>
+
+
+
+<p>到这里我们已经明白了partial是怎么保存原函数和固定参数的了，下面来看一下调用的时候是如何执行的。</p>
+<p>先简单了解一下可调用对象：<strong>当一个类实现了”__<em>call</em>__“方法后，这个类的对象就能够像函数一样被调用。</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Callable</span>:<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__call__</span>(<span class="hljs-params">self, a, b</span>):<br>        <span class="hljs-keyword">return</span> a + b<br><br><br>func = <span class="hljs-type">Callable</span>()  <br>result = func(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>) <span class="hljs-comment"># 像函数一样调用</span><br><span class="hljs-built_in">print</span>(result)<br><br>输出：<span class="hljs-number">5</span><br></code></pre></td></tr></table></figure>
+
+<p>我们看下partial的”__<em>call</em>__“是如何实现的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">__call__</span>(<span class="hljs-params">*args, **keywords</span>):<br>    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> args:<br>        <span class="hljs-keyword">raise</span> TypeError(<span class="hljs-string">&quot;descriptor &#x27;__call__&#x27; of partial needs an argument&quot;</span>)<br>    self, *args = args<br>    newkeywords = self.keywords.copy()<br>    newkeywords.update(keywords)<br>    <span class="hljs-keyword">return</span> self.func(*self.args, *args, **newkeywords)<br></code></pre></td></tr></table></figure>
+
+<p>1、元组拆包，获取到传入的非固定参数args</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">self, *args = args<br></code></pre></td></tr></table></figure>
+
+<p>2、拷贝当前对象的keywords参数，并且合并传入的非固定参数字典</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">newkeywords = self.keywords.copy()<br>newkeywords.update(keywords)<br></code></pre></td></tr></table></figure>
+
+<p>3、调用当前对象的func属性，func即被partial包装的原函数，同时传入暂存的固定参数self.args以及新传入的其它参数。</p>
+<p>至此一切真相大白：<strong>partial通过实现”__new__“和”__call__“生成一个可调用对象，这个对象内部保存了被包装函数以及固定参数，这个对象可以像函数一样被调用，调用时，其实是执行了对象内部持有的被包装函数，其参数由固定参数和新传入的参数组合而来。</strong></p>
+<p>继续探索wraps的源码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">wraps</span>(<span class="hljs-params">wrapped,</span><br><span class="hljs-params">          assigned = WRAPPER_ASSIGNMENTS,</span><br><span class="hljs-params">          updated = WRAPPER_UPDATES</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;Decorator factory to apply update_wrapper() to a wrapper function</span><br><span class="hljs-string"></span><br><span class="hljs-string">       Returns a decorator that invokes update_wrapper() with the decorated</span><br><span class="hljs-string">       function as the wrapper argument and the arguments to wraps() as the</span><br><span class="hljs-string">       remaining arguments. Default arguments are as for update_wrapper().</span><br><span class="hljs-string">       This is a convenience function to simplify applying partial() to</span><br><span class="hljs-string">       update_wrapper().</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    <span class="hljs-keyword">return</span> partial(update_wrapper, wrapped=wrapped,<br>                   assigned=assigned, updated=updated)<br></code></pre></td></tr></table></figure>
+
+<p>入参解读：</p>
+<p>wrapped：指被装饰器装饰的原函数，我们的装饰器便是要拷贝它的属性。</p>
+<p>assigned：要被重新赋值的属性列表，默认为WRAPPER_ASSIGNMENTS，可自定义传入</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">WRAPPER_ASSIGNMENTS = (<span class="hljs-string">&#x27;__module__&#x27;</span>, <span class="hljs-string">&#x27;__name__&#x27;</span>, <span class="hljs-string">&#x27;__qualname__&#x27;</span>, <span class="hljs-string">&#x27;__doc__&#x27;</span>,<br>                       <span class="hljs-string">&#x27;__annotations__&#x27;</span>)<br></code></pre></td></tr></table></figure>
+
+<p>updated：要被合并的属性列表，默认为WRAPPER_UPDATES，可自定义传入</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">WRAPPER_UPDATES = (<span class="hljs-string">&#x27;__dict__&#x27;</span>,)<br></code></pre></td></tr></table></figure>
+
+<p>返回值：</p>
+<p>返回了一个partial对象，这个对象对update_wrapper进行了包装，固定了wrapped，assigned，updated三个参数。</p>
+<p>wraps本省就是一个装饰器，因为它返回的是一个“函数”即partial对象，这个对象接收函数作为参数，同时以函数作为返回值。</p>
+<p>接下来看update_wrapper：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">update_wrapper</span>(<span class="hljs-params">wrapper,</span><br><span class="hljs-params">                   wrapped,</span><br><span class="hljs-params">                   assigned = WRAPPER_ASSIGNMENTS,</span><br><span class="hljs-params">                   updated = WRAPPER_UPDATES</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;Update a wrapper function to look like the wrapped function</span><br><span class="hljs-string"></span><br><span class="hljs-string">       wrapper is the function to be updated</span><br><span class="hljs-string">       wrapped is the original function</span><br><span class="hljs-string">       assigned is a tuple naming the attributes assigned directly</span><br><span class="hljs-string">       from the wrapped function to the wrapper function (defaults to</span><br><span class="hljs-string">       functools.WRAPPER_ASSIGNMENTS)</span><br><span class="hljs-string">       updated is a tuple naming the attributes of the wrapper that</span><br><span class="hljs-string">       are updated with the corresponding attribute from the wrapped</span><br><span class="hljs-string">       function (defaults to functools.WRAPPER_UPDATES)</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    <span class="hljs-keyword">for</span> attr <span class="hljs-keyword">in</span> assigned:<br>        <span class="hljs-keyword">try</span>:<br>            value = <span class="hljs-built_in">getattr</span>(wrapped, attr)<br>        <span class="hljs-keyword">except</span> AttributeError:<br>            <span class="hljs-keyword">pass</span><br>        <span class="hljs-keyword">else</span>:<br>            <span class="hljs-built_in">setattr</span>(wrapper, attr, value)<br>    <span class="hljs-keyword">for</span> attr <span class="hljs-keyword">in</span> updated:<br>        <span class="hljs-built_in">getattr</span>(wrapper, attr).update(<span class="hljs-built_in">getattr</span>(wrapped, attr, &#123;&#125;))<br>    <span class="hljs-comment"># Issue #17482: set __wrapped__ last so we don&#x27;t inadvertently copy it</span><br>    <span class="hljs-comment"># from the wrapped function when updating __dict__</span><br>    wrapper.__wrapped__ = wrapped<br>    <span class="hljs-comment"># Return the wrapper so this can be used as a decorator via partial()</span><br>    <span class="hljs-keyword">return</span> wrapper<br></code></pre></td></tr></table></figure>
+
+<p>这个便是解析@functools.wraps(func)时最底层执行的逻辑，代码很简洁，就是把wrapped函数的属性拷贝到wrapper函数中。</p>
+<p><strong>wrapped是被装饰的原函数</strong></p>
+<p><strong>wrapper是被装饰器装饰后的新函数。</strong></p>
+<p>通过下面的例子对执行过程和参数进行对号入座</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">outer</span>(<span class="hljs-params">func</span>):<br><span class="hljs-meta">    @functools.wraps(<span class="hljs-params">func</span>)</span><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">inner</span>(<span class="hljs-params">*args, **kwargs</span>):<br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;before...&quot;</span>)<br>        func(*args, **kwargs)<br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;after...&quot;</span>)<br><br>    <span class="hljs-keyword">return</span> inner<br><br><br><span class="hljs-meta">@outer</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">a, b</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    求和运算</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    <span class="hljs-built_in">print</span>(a + b)<br></code></pre></td></tr></table></figure>
+
+<p>1、原函数为add。</p>
+<p>2、@outer会去执行outer装饰器，传入add函数，返回一个inner函数。</p>
+<p>3、执行outer函数时，加载inner函数，此时会直接执行functools.wraps(func)返回一个可调用对象，即partial对象。</p>
+<p>4、此时inner的装饰器实际上是@partial，partial会被调用，传入inner函数，执行partial内部的update_wrapper函数，将func的相应属性拷贝给inner函数，最后返回inner函数。这一步并没有生成新的函数，仅仅是改变了inner函数的属性。</p>
+<p>5、把add指向inner函数。</p>
+<p>6、调用add实际调用的是inner函数，inner函数内部持有原add函数的引用即func。</p>
+<p><strong>update_wrapper函数参数对应：</strong></p>
+<p><strong>wrapper指的是inner函数</strong></p>
+<p><strong>wrapped指的是func即原始的add函数</strong></p>
+<p><strong>总结：</strong></p>
+<p><strong>1）functools.wraps 旨在消除装饰器对原函数造成的影响，即对原函数的相关属性进行拷贝，已达到装饰器不修改原函数的目的。</strong></p>
+<p><strong>2）wraps内部通过partial对象和update_wrapper函数实现。</strong></p>
+<p><strong>3）partial是一个类，通过实现了双下方法new，自定义实例化对象过程，使得对象内部保留原函数和固定参数，通过实现双下方法call，使得对象可以像函数一样被调用，再通过内部保留的原函数和固定参数以及传入的其它参数进行原函数调用。</strong></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/master/categories/Coding/" class="category-chain-item">Coding</a>
+  
+  
+    <span>></span>
+    
+  <a href="/master/categories/Coding/Python/" class="category-chain-item">Python</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/master/tags/Python/">#Python</a>
+      
+        <a href="/master/tags/functools/">#functools</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Python装饰器和functools.wraps简单解析</div>
+      <div>https://pandintelli.github.io/master/2022/02/19/Python-decorator/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Pand</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年2月19日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/master/2022/02/22/Non-local-Neural-Network/" title="论文阅读：Non-local Neural Networks">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">论文阅读：Non-local Neural Networks</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/master/2022/02/18/Python-format/" title="Python format 字符串格式化函数">
+                        <span class="hidden-mobile">Python format 字符串格式化函数</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      蜀ICP备2022001332号
+    </a>
+  </span>
+  
+    
+      <span>
+        <a
+          href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=51010702002729"
+          rel="nofollow noopener"
+          class="beian-police"
+          target="_blank"
+        >
+          
+            <span style="visibility: hidden; width: 0">|</span>
+            <img src="/master/img/police_beian.png" srcset="/master/img/loading.gif" lazyload alt="police-icon"/>
+          
+          <span>川公网安备 51010702002729号</span>
+        </a>
+      </span>
+    
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/master/js/events.js" ></script>
+<script  src="/master/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/master/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/master/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/master/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

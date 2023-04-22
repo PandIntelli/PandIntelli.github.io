@@ -1,0 +1,827 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/master/img/aquaicon.png">
+  <link rel="icon" href="/master/img/aquaicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Pand">
+  <meta name="keywords" content="Hexo, Contrastive Learning, Research">
+  
+    <meta name="description" content="本文介绍 PyTorch 上进行多机多卡分布式训练的原理和操作方法，以便于训练神经网络时获得显著的性能提升。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch 分布式训练">
+<meta property="og:url" content="https://pandintelli.github.io/master/2022/02/24/DistributedModelTraining/index.html">
+<meta property="og:site_name" content="Pand&#96;s Blog">
+<meta property="og:description" content="本文介绍 PyTorch 上进行多机多卡分布式训练的原理和操作方法，以便于训练神经网络时获得显著的性能提升。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pandintelli.github.io/master/index_img/horovod.png">
+<meta property="article:published_time" content="2022-02-24T01:29:37.000Z">
+<meta property="article:modified_time" content="2023-04-21T11:53:17.280Z">
+<meta property="article:author" content="Pand">
+<meta property="article:tag" content="Distribute">
+<meta property="article:tag" content="PyTorch">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://pandintelli.github.io/master/index_img/horovod.png">
+  
+  
+  
+  <title>PyTorch 分布式训练 - Pand`s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/master/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/master/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/master/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"pandintelli.github.io","root":"/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/master/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/master/js/utils.js" ></script>
+  <script  src="/master/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/master/">
+      <strong>Pand`s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/master/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/master/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">PyTorch 分布式训练</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-02-24 09:29" pubdate>
+          2022年2月24日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          5.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          46 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">PyTorch 分布式训练</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>随着神经网络的参数数量和计算需求的增长，在许多节点和许多GPU上有效并行化神经网络训练变得越来越重要，因为等待大型网络训练数月会减慢实验速度并限制进一步的发展。本文介绍 PyTorch 上进行多机多卡分布式训练的原理和操作方法，以便于训练神经网络时获得显著的性能提升。</p>
+<p>在将神经网络的训练并行化到许多GPU上时，必须选择如何将不同的操作分配到可用的不同GPU上。 在这里，我们重点介绍一种称为数据并行随机梯度下降（SGD）的技术。 与标准SGD中一样，梯度下降是对数据子集（mini-batch）进行的，需要进行多次迭代才能遍历整个数据集。 但是，在数据并行训练中，每个GPU都具有整个神经网络模型的完整副本，并且对于每次迭代，mini-batch中仅分配了样本的子集。 对于每次迭代，每个GPU都会在其数据上进行网络的正向传播和反向传播，以计算相对于网络参数的损耗梯度。</p>
+<p>最后，GPU彼此通信以平均不同GPU计算的梯度，将平均梯度应用于权重以获得新的权重。 所有GPU都以锁定步长(lock-step)进行迭代，一旦GPU完成迭代，它就必须等待所有其他GPU完成迭代，才能正确地更新权重。 这等效于在单个GPU上执行SGD，但是我们通过在多个GPU之间分配数据并并行进行计算来获得加速。</p>
+<h2 id="两种架构"><a href="#两种架构" class="headerlink" title="两种架构"></a>两种架构</h2><h3 id="TreeAllReduce"><a href="#TreeAllReduce" class="headerlink" title="TreeAllReduce"></a>TreeAllReduce</h3><p>这种架构如图所示。采用这种计算模型的分布式，通常会遇到网络的问题，随着 <code>worker</code> 数量的增加，其加速比会迅速地恶化，需要借助其他辅助技术。</p>
+<img src="master-slave-gpus.png" srcset="/master/img/loading.gif" lazyload  alt= "Data transfer to and from a single reducer GPU"/>
+
+<p>由于某一个 <code>GPU</code> 需要接收其他所有 <code>GPU</code> 的梯度，并求平均以及 <code>broadcast</code> 回去，通信成本随 <code>GPU</code> 的数量线性增加。</p>
+<h3 id="RingAllReduce"><a href="#RingAllReduce" class="headerlink" title="RingAllReduce"></a>RingAllReduce</h3><p>这种架构的特点是：通信成本是恒定的，并且与系统中GPU的数量无关，并且仅有系统中GPU之间最慢的连接确定。</p>
+<img src="ring-gpus.png" srcset="/master/img/loading.gif" lazyload alt="GPUs arranged in a logical ring"/>
+
+<p>如图所示，在 <code>RingAllRedce</code> 中，<code>GPU</code> 集群被组织成一个逻辑环，每个 <code>GPU</code> 只从左邻居接受数据、并发送数据给右邻居，即每次同步每个 <code>GPU</code> 只获得部分梯度更新，等一个完整的 <code>Ring</code> 完成，每个 <code>GPU</code> 都获得了完整的参数。</p>
+<p>该算法分两个步骤进行：首先是 scatter reduce，然后是 all gather。在 scatter reduce 步骤中，<code>GPU</code> 将交换数据，以使每个 <code>GPU</code> 获得最终结果的一部分。在 all gather 步骤中，<code>GPU</code> 将交换这些块，以使所有 <code>GPU</code> 获得完整的最终结果。</p>
+<h2 id="详细流程"><a href="#详细流程" class="headerlink" title="详细流程"></a>详细流程</h2><h3 id="The-Scatter-Reduce"><a href="#The-Scatter-Reduce" class="headerlink" title="The Scatter-Reduce"></a>The Scatter-Reduce</h3><p>为了简单起见，我们假设目标是按元素逐个汇总一个大型浮点数数组中的所有元素； 系统中有N个 <code>GPU</code>，每个 <code>GPU</code> 都有一个相同大小的数组，并且在all reduce结束，每个 <code>GPU</code> 都应具有相同大小的数组，其中包含原始数组中数字的总和。</p>
+<p>首先，<code>GPU</code> 将阵列划分为N个较小的块（其中N是环中 <code>GPU</code> 的数量）。</p>
+<img src="array-partition.png" srcset="/master/img/loading.gif" lazyload alt="Partitioning of an array into N chunks"/>
+
+<p>接下来，<code>GPU</code> 将执行 scatter reduce 的 N-1 次迭代； 在每次迭代中，<code>GPU</code> 都会将其块之一发送到其右邻居，并从其左邻居接收一个块，并累积到该块中。 每个GPU发送和接收的块在每次迭代中都不同。 第 N 个GPU从发送块N 和接收块 N – 1 开始，然后从那里向后进行，每次迭代都发送在上一次迭代中接收到的块。</p>
+<p>例如，在第一次迭代中，上图中的五个 <code>GPU</code> 将发送和接收以下块：</p>
+<img src="scatter-reduce-iteration-1.png" srcset="/master/img/loading.gif" lazyload alt="Data transfers in the first iteration of scatter-reduce"/>
+
+<p>在第一个发送和接收完成之后，每个 <code>GPU</code> 将具有一个块，该块由两个不同 <code>GPU</code> 上相同块的总和组成。 例如，第二个 <code>GPU</code> 上的第一个块将是来自第二个 <code>GPU</code> 和第一个 <code>GPU</code> 的那个块中的值之和。</p>
+<img src="scatter-reduce-iteration-2.png" srcset="/master/img/loading.gif" lazyload alt="Itermediate sums after the first iteration of scatter-reduce is complete"/>
+
+<p>在接下来的迭代中，该过程继续进行，到最后，每个 <code>GPU</code> 将具有一个块，其中包含所有 <code>GPU</code> 中该块中所有值的总和。 下图显示了 scatter reduce 完成后的结果。</p>
+<img src="scatter-reduce-iteration-done.png" srcset="/master/img/loading.gif" lazyload alt="Final state after all scatter-reduce transfers"/>
+
+<h3 id="The-Allgather"><a href="#The-Allgather" class="headerlink" title="The Allgather"></a>The Allgather</h3><p>ring allgather 与 scatter reduce 相同（发送和接收进行 N-1 次迭代）相同，除了它们不累积 <code>GPU</code> 接收的值，而是简单地覆盖块。 第 N 个 <code>GPU</code> 首先发送第 N + 1 个块并接收第 N 个块，然后在以后的迭代中始终发送它刚接收的块。</p>
+<p>例如，在我们的五个 <code>GPU</code> 设置的第一个迭代中，<code>GPU</code> 将发送和接收以下块：</p>
+<img src="allgather-iteration-1.png" srcset="/master/img/loading.gif" lazyload alt="Data transfers in the first iteration of the allgather"/>
+
+<p>在接下来的迭代中，该过程继续进行，最后，每个GPU将具有整个阵列的完全累加值。下图显示了 Allgather 完成后的结果。</p>
+<img src="allgather-iteration-done.png" srcset="/master/img/loading.gif" lazyload alt="Final state after all allgather transfers"/>
+
+<h3 id="在深度学习上的应用"><a href="#在深度学习上的应用" class="headerlink" title="在深度学习上的应用"></a>在深度学习上的应用</h3><p>为了最小化通信开销，我们可以利用神经网络的结构。 在每次迭代中，每个GPU都运行正向传播以计算误差，然后运行反向传播以计算神经网络的每个参数的梯度。 反向传播计算从输出层开始并向输入层移动，这意味着输出层参数的梯度在较早层的梯度之前明显可用。 由于Allreduce一次可以对网络参数的一个子集进行操作，因此我们可以在输出层参数上开始Allreduce，而其他梯度仍在计算中。 这样做会使通信与反向传播步骤中的其余计算重叠，从而减少了每个GPU最终等待通信完成的总时间。</p>
+<h2 id="PyTorch-分布式训练"><a href="#PyTorch-分布式训练" class="headerlink" title="PyTorch 分布式训练"></a>PyTorch 分布式训练</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><table>
+<thead>
+<tr>
+<th align="left">概念</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>group</code></td>
+<td>即进程组。默认情况下，只有一个组，一个 <code>job</code> 即为一个组，也即一个 <code>world</code>。</td>
+</tr>
+<tr>
+<td align="left"><code>world size</code></td>
+<td>表示全局进程个数。</td>
+</tr>
+<tr>
+<td align="left"><code>rank</code></td>
+<td>表示进程序号，用于进程间通讯，表征进程优先级。<code>rank = 0</code> 的主机为 <code>master</code> 节点。</td>
+</tr>
+<tr>
+<td align="left"><code>local_rank</code></td>
+<td>进程内，<code>GPU</code> 编号，非显式参数，由 <code>torch.distributed.launch</code> 内部指定。比方说， <code>rank = 3，local_rank = 0</code> 表示第 <code>3</code> 个进程内的第 <code>1</code> 块 <code>GPU</code>。</td>
+</tr>
+</tbody></table>
+<h3 id="基本使用流程"><a href="#基本使用流程" class="headerlink" title="基本使用流程"></a>基本使用流程</h3><p><code>PyTorch</code> 中分布式的基本使用流程如下：</p>
+<ol>
+<li>在使用 <code>distributed</code> 包的任何其他函数之前，需要使用 <code>init_process_group</code> 初始化进程组，同时初始化 <code>distributed</code> 包。</li>
+<li>如果需要进行小组内集体通信，用 <code>new_group</code> 创建子分组</li>
+<li>创建分布式并行模型 <code>DDP(model, device_ids=device_ids)</code></li>
+<li>为数据集创建 <code>Sampler</code></li>
+</ol>
+<h3 id="重要-API"><a href="#重要-API" class="headerlink" title="重要 API"></a>重要 API</h3><p>过时 API：DataParallel</p>
+<p>这个wrapper能够很方便的使用多张卡，而且将进程控制在一个。唯一的问题就在于，DataParallel只能满足一台机器上gpu的通信，而一台机器一般只能装8张卡，对于一些大任务，8张卡就很吃力了。</p>
+<p>PyTorch 最新版本多机多卡训练的 API 如下：</p>
+<ul>
+<li>torch.nn.parallel.DistributedDataParallel</li>
+</ul>
+<p>​		这个包是实现多机多卡分布训练最核心东西，它可以帮助我们在不同机器的多个模型拷贝平均梯度。</p>
+<ul>
+<li>torch.utils.data.distributed.DistributedSampler</li>
+</ul>
+<p>​		在多机多卡情况下分布式训练数据的读取也是一个问题，不同的卡读取到的数据应该是不同的。dataparallel的做法是直接将batch切分到不同的卡，这种方法对于多机来说不可取，因为多机之间直接进行数据传输会严重影响效率。于是有了利用sampler确保dataloader只会load到整个数据集的一个特定子集的做法。DistributedSampler就是做这件事的。它为每一个子进程划分出一部分数据集，以避免不同进程之间数据重复。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># 分布式训练示例</span><br><span class="hljs-keyword">from</span> torch.utils.data <span class="hljs-keyword">import</span> Dataset, DataLoader<br><span class="hljs-keyword">from</span> torch.utils.data.distributed <span class="hljs-keyword">import</span> DistributedSampler<br><span class="hljs-keyword">from</span> torch.nn.parallel <span class="hljs-keyword">import</span> DistributedDataParallel<br><br>dataset = your_dataset()<br>datasampler = DistributedSampler(dataset, num_replicas=world_size, rank=rank)<br>dataloader = DataLoader(dataset, batch_size=batch_size_per_gpu, sampler=datasampler)<br>model = your_model()<br>model = DistributedDataPrallel(model, device_ids=[local_rank], output_device=local_rank)<br></code></pre></td></tr></table></figure>
+
+<p>其他部分就和正常训练代码无异了。</p>
+<p>注意要点：</p>
+<ol>
+<li>和dataparallel不同，dataparallel需要将batchsize设置成n倍的单卡batchsize，而distributedsampler使用的情况下，batchsize设置与单卡设置相同。</li>
+<li>这里有几个新的参数：world size, rank, local rank, rank。world size指进程总数，在这里就是我们使用的卡数；rank指进程序号，local_rank指本地序号，两者的区别在于前者用于进程间通讯，后者用于本地设备分配。</li>
+</ol>
+<h3 id="Slurm-集群训练示例"><a href="#Slurm-集群训练示例" class="headerlink" title="Slurm 集群训练示例"></a>Slurm 集群训练示例</h3><blockquote>
+<p><a target="_blank" rel="noopener" href="https://pytorch.org/docs/stable/distributed.html?highlight=nccl">多线程分布式后端</a> 有 gloo, npi, nccl 三种。gloo 基本只支持 cpu，mpi 需要在本地重新编译 PyTorch，nccl 对 GPU 支持良好还不需要重新编译，官方推荐 nccl。</p>
+</blockquote>
+<p>关于获取节点信息的详细代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> os<br>os.environ[<span class="hljs-string">&#x27;SLURM_NTASKS&#x27;</span>]          <span class="hljs-comment">#可用作world size</span><br>os.environ[<span class="hljs-string">&#x27;SLURM_NODEID&#x27;</span>]          <span class="hljs-comment">#node id</span><br>os.environ[<span class="hljs-string">&#x27;SLURM_PROCID&#x27;</span>]          <span class="hljs-comment">#可用作全局rank</span><br>os.environ[<span class="hljs-string">&#x27;SLURM_LOCALID&#x27;</span>]         <span class="hljs-comment">#local_rank</span><br>os.environ[<span class="hljs-string">&#x27;SLURM_STEP_NODELIST&#x27;</span>]   <span class="hljs-comment">#从中取得一个ip作为通讯ip</span><br></code></pre></td></tr></table></figure>
+
+<p>完整示例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> torch<br>torch.multiprocessing.set_start_method(<span class="hljs-string">&#x27;spawn&#x27;</span>)<br><br><span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn<br><span class="hljs-keyword">from</span> torch.utils.data <span class="hljs-keyword">import</span> Dataset, DataLoader<br><span class="hljs-keyword">from</span> torch.utils.data.distributed <span class="hljs-keyword">import</span> DistributedSampler<br><span class="hljs-keyword">from</span> torch.nn.parallel <span class="hljs-keyword">import</span> DistributedDataParallel<br><span class="hljs-keyword">import</span> os<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">dist_init</span>(<span class="hljs-params">host_addr, rank, local_rank, world_size, port=<span class="hljs-number">23456</span></span>):<br>    host_addr_full = <span class="hljs-string">&#x27;tcp://&#x27;</span> + host_addr + <span class="hljs-string">&#x27;:&#x27;</span> + <span class="hljs-built_in">str</span>(port)<br>    torch.distributed.init_process_group(<span class="hljs-string">&quot;nccl&quot;</span>, init_method=host_addr_full,<br>                                         rank=rank, world_size=world_size)<br>    num_gpus = torch.cuda.device_count()<br>    torch.cuda.set_device(local_rank)<br>    <span class="hljs-keyword">assert</span> torch.distributed.is_initialized()<br><br>rank = <span class="hljs-built_in">int</span>(os.environ[<span class="hljs-string">&#x27;SLURM_PROCID&#x27;</span>])<br>local_rank = <span class="hljs-built_in">int</span>(os.environ[<span class="hljs-string">&#x27;SLURM_LOCALID&#x27;</span>])<br>world_size = <span class="hljs-built_in">int</span>(os.environ[<span class="hljs-string">&#x27;SLURM_NTASKS&#x27;</span>])<br><span class="hljs-comment"># get_ip函数自己写一下 不同服务器这个字符串形式不一样</span><br><span class="hljs-comment"># 保证所有task拿到的是同一个ip就成</span><br>ip = get_ip(os.environ[<span class="hljs-string">&#x27;SLURM_STEP_NODELIST&#x27;</span>])<br><br>dist_init(ip, rank, local_rank, world_size)<br><br><br><span class="hljs-comment"># 接下来是写dataset和dataloader，这个网上有很多教程</span><br><span class="hljs-comment"># 我这给的也只是个形式，按自己需求写好就ok</span><br>dataset = your_dataset()  <span class="hljs-comment">#主要是把这写好</span><br>datasampler = DistributedSampler(dataset, num_replicas=world_size, rank=rank)<br>dataloader = DataLoader(dataset, batch_size=batch_size_per_gpu, sampler=source_sampler)<br><br>model = your_model()     <span class="hljs-comment">#也是按自己的模型写</span><br>model = DistributedDataPrallel(model, device_ids=[local_rank], output_device=local_rank)<br><br><span class="hljs-comment"># 此后训练流程与普通模型无异</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><p>[1] <a target="_blank" rel="noopener" href="https://andrew.gibiansky.com/blog/machine-learning/baidu-allreduce/">Bringing HPC Techniques to Deep Learning</a></p>
+</li>
+<li><p>[2] <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/126754580">Bringing HPC Techniques to Deep Learning (翻译)</a></p>
+</li>
+<li><p>[3] <a target="_blank" rel="noopener" href="https://pytorch.org/tutorials/intermediate/ddp_tutorial.html#">Getting Started With Distributed Data Parallel (PyTorch Tutorial)</a></p>
+</li>
+<li><p>[4] <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/68717029">Pytorch多机多卡分布式训练</a></p>
+</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/master/categories/Coding/" class="category-chain-item">Coding</a>
+  
+  
+    <span>></span>
+    
+  <a href="/master/categories/Coding/PyTorch/" class="category-chain-item">PyTorch</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/master/tags/Distribute/">#Distribute</a>
+      
+        <a href="/master/tags/PyTorch/">#PyTorch</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>PyTorch 分布式训练</div>
+      <div>https://pandintelli.github.io/master/2022/02/24/DistributedModelTraining/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Pand</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年2月24日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/master/2022/02/24/Transformer/" title="论文阅读：Attention Is All You Need">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">论文阅读：Attention Is All You Need</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/master/2022/02/23/ResNet/" title="论文阅读：Deep Residual Learning for Image Recognition">
+                        <span class="hidden-mobile">论文阅读：Deep Residual Learning for Image Recognition</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      蜀ICP备2022001332号
+    </a>
+  </span>
+  
+    
+      <span>
+        <a
+          href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=51010702002729"
+          rel="nofollow noopener"
+          class="beian-police"
+          target="_blank"
+        >
+          
+            <span style="visibility: hidden; width: 0">|</span>
+            <img src="/master/img/police_beian.png" srcset="/master/img/loading.gif" lazyload alt="police-icon"/>
+          
+          <span>川公网安备 51010702002729号</span>
+        </a>
+      </span>
+    
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/master/js/events.js" ></script>
+<script  src="/master/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/master/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/master/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/master/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
