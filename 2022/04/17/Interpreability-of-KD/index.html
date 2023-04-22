@@ -7,8 +7,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <link rel="apple-touch-icon" sizes="76x76" href="/tree/master/img/aquaicon.png">
-  <link rel="icon" href="/tree/master/img/aquaicon.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/aquaicon.png">
+  <link rel="icon" href="/img/aquaicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
@@ -19,17 +19,17 @@
     <meta name="description" content="从最优化角度简单设计了一下softmax的优化目标, 然后通过函数拟合。这篇文章通过更换对softmax进行拟合时的近似函数来从数值上直接解释知识蒸馏温度T对原来数值的影响。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="关于知识蒸馏温度T的一个简单解释(最优化函数拟合角度)">
-<meta property="og:url" content="https://pandintelli.github.io/tree/master/2022/04/17/Interpreability-of-KD/index.html">
+<meta property="og:url" content="https://pandintelli.github.io/2022/04/17/Interpreability-of-KD/index.html">
 <meta property="og:site_name" content="Pand&#96;s Blog">
 <meta property="og:description" content="从最优化角度简单设计了一下softmax的优化目标, 然后通过函数拟合。这篇文章通过更换对softmax进行拟合时的近似函数来从数值上直接解释知识蒸馏温度T对原来数值的影响。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://pandintelli.github.io/tree/master/index_img/Interpreability%20of%20KD.png">
+<meta property="og:image" content="https://pandintelli.github.io/index_img/Interpreability%20of%20KD.png">
 <meta property="article:published_time" content="2022-04-17T08:05:07.000Z">
 <meta property="article:modified_time" content="2023-04-21T11:53:17.570Z">
 <meta property="article:author" content="Pand">
 <meta property="article:tag" content="Knowledge Distillation">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://pandintelli.github.io/tree/master/index_img/Interpreability%20of%20KD.png">
+<meta name="twitter:image" content="https://pandintelli.github.io/index_img/Interpreability%20of%20KD.png">
   
   
   
@@ -57,12 +57,12 @@
 <link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
 
 
-<link  rel="stylesheet" href="/tree/master/css/main.css" />
+<link  rel="stylesheet" href="/css/main.css" />
 
 
-  <link id="highlight-css" rel="stylesheet" href="/tree/master/css/highlight.css" />
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/tree/master/css/highlight-dark.css" />
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
   
 
 
@@ -71,15 +71,15 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"pandintelli.github.io","root":"/tree/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/tree/master/local-search.xml"};
+    var CONFIG = {"hostname":"pandintelli.github.io","root":"/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
       Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
     }
   </script>
-  <script  src="/tree/master/js/utils.js" ></script>
-  <script  src="/tree/master/js/color-schema.js" ></script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
   
 
 
@@ -96,7 +96,7 @@
 <div class="header-inner" style="height: 70vh;">
   <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
-    <a class="navbar-brand" href="/tree/master/">
+    <a class="navbar-brand" href="/">
       <strong>Pand`s Blog</strong>
     </a>
 
@@ -115,7 +115,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/tree/master/">
+              <a class="nav-link" href="/">
                 <i class="iconfont icon-home-fill"></i>
                 <span>首页</span>
               </a>
@@ -127,7 +127,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/tree/master/archives/">
+              <a class="nav-link" href="/archives/">
                 <i class="iconfont icon-archive-fill"></i>
                 <span>归档</span>
               </a>
@@ -139,7 +139,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/tree/master/categories/">
+              <a class="nav-link" href="/categories/">
                 <i class="iconfont icon-category-fill"></i>
                 <span>分类</span>
               </a>
@@ -151,7 +151,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/tree/master/tags/">
+              <a class="nav-link" href="/tags/">
                 <i class="iconfont icon-tags-fill"></i>
                 <span>标签</span>
               </a>
@@ -163,7 +163,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/tree/master/about/">
+              <a class="nav-link" href="/about/">
                 <i class="iconfont icon-user-fill"></i>
                 <span>关于</span>
               </a>
@@ -193,7 +193,7 @@
   
 
 <div id="banner" class="banner" parallax=true
-     style="background: url('/tree/master/img/default.png') no-repeat center center; background-size: cover;">
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
   <div class="full-bg-img">
     <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
       <div class="banner-text text-center fade-in-up">
@@ -280,7 +280,7 @@
                 
                 <p>本篇文章用最优化近似的角度解释Softmax，并进一步对知识蒸馏的温度T做出解释。要解释知识蒸馏，首先要对它进行介绍。</p>
 <h1 id="知识蒸馏"><a href="#知识蒸馏" class="headerlink" title="知识蒸馏"></a>知识蒸馏</h1><p>知识蒸馏是Hinton于2015年提出的概念，借助一个大的、泛用性强的模型去训练一个小的、专有性(用于执行某一特定功能)强的模型。</p>
-<img src="./KD_model.jpeg" srcset="/tree/master/img/loading.gif" lazyload/>
+<img src="./KD_model.jpeg" srcset="/img/loading.gif" lazyload/>
 
 <p>具体做法是，同样的输入分别通过大模型(Teacher模型)和小模型(Student模型)，产生预测值。Teacher模型的预测值为$v_i$，Student模型的预测值为$z_i$。让Student模型的输出$z_i$同时和$v_i$、GT做近似。</p>
 <p>可以看出来，和平常的神经网络训练相比，知识蒸馏的训练方法引入了Teacher模型的输出作为一个近似的Label。因为如果是做图像分类任务的话，它通常是一个经过Softmax处理后的概率分布，所以我们也叫它soft label。至于GT，因为它是one-hot形式的，所以也叫它hard label。</p>
@@ -314,7 +314,7 @@
 <p>为了方便讨论，这里设$x&gt;0$，实际上输出的也是概率，所以这个假设也是合理的。</p>
 <p>为了衡量近似程度，把约等式相减，计算误差，可以得到：<br>$$<br>|\log(1+e^x)-x|&gt;|\log(1+e^{sx})-sx|<br>$$<br>乘以$s$后，误差变得更小，也就是和原函数近似程度更高，也就是采用了更光滑的近似。</p>
 <p>或者从图上直观解释，画出了$\ln(1+e^{0.2x})-x$和$\ln(1+e^{0.01x})-x$的图像：</p>
-<img src="./image-20220410162440200.png" srcset="/tree/master/img/loading.gif" lazyload alt="近似函数图像" style="zoom:67%;" />
+<img src="./image-20220410162440200.png" srcset="/img/loading.gif" lazyload alt="近似函数图像" style="zoom:67%;" />
 
 <p>黑色是$\ln(1+e^{0.01x})-x$, 蓝色是$\ln(1+e^{0.2x})-x$</p>
 <p>这里的$s$分别取了0.01和0.2(换算成对应的温度是T&#x3D;100和T&#x3D;50)</p>
@@ -339,7 +339,7 @@
     
       <span class="category-chain">
         
-  <a href="/tree/master/categories/Miscellaneous/" class="category-chain-item">Miscellaneous</a>
+  <a href="/categories/Miscellaneous/" class="category-chain-item">Miscellaneous</a>
   
   
 
@@ -354,7 +354,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tree/master/tags/Knowledge-Distillation/">#Knowledge Distillation</a>
+        <a href="/tags/Knowledge-Distillation/">#Knowledge Distillation</a>
       
     </div>
   
@@ -367,7 +367,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>关于知识蒸馏温度T的一个简单解释(最优化函数拟合角度)</div>
-      <div>https://pandintelli.github.io/tree/master/2022/04/17/Interpreability-of-KD/</div>
+      <div>https://pandintelli.github.io/2022/04/17/Interpreability-of-KD/</div>
     </div>
     <div class="license-meta">
       
@@ -415,7 +415,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/tree/master/2022/04/10/Depth-wise-Convolution/" title="深度分离卷积方法简介">
+                      <a href="/2022/04/10/Depth-wise-Convolution/" title="深度分离卷积方法简介">
                         <span class="hidden-mobile">深度分离卷积方法简介</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -548,7 +548,7 @@
         >
           
             <span style="visibility: hidden; width: 0">|</span>
-            <img src="/tree/master/img/police_beian.png" srcset="/tree/master/img/loading.gif" lazyload alt="police-icon"/>
+            <img src="/img/police_beian.png" srcset="/img/loading.gif" lazyload alt="police-icon"/>
           
           <span>川公网安备 51010702002729号</span>
         </a>
@@ -579,15 +579,15 @@
 
 <script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
 <script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
-<script  src="/tree/master/js/events.js" ></script>
-<script  src="/tree/master/js/plugins.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
 
 
 
 
 
   
-    <script  src="/tree/master/js/img-lazyload.js" ></script>
+    <script  src="/js/img-lazyload.js" ></script>
   
 
 
@@ -729,7 +729,7 @@
 
   <script  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" ></script>
 
-  <script  src="/tree/master/js/local-search.js" ></script>
+  <script  src="/js/local-search.js" ></script>
 
 
 
@@ -737,7 +737,7 @@
 
 <!-- 主题的启动项，将它保持在最底部 -->
 <!-- the boot of the theme, keep it at the bottom -->
-<script  src="/tree/master/js/boot.js" ></script>
+<script  src="/js/boot.js" ></script>
 
 
   

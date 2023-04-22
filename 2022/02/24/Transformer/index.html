@@ -7,8 +7,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <link rel="apple-touch-icon" sizes="76x76" href="/tree/master/img/aquaicon.png">
-  <link rel="icon" href="/tree/master/img/aquaicon.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/aquaicon.png">
+  <link rel="icon" href="/img/aquaicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
@@ -19,17 +19,17 @@
     <meta name="description" content="阅读了这篇文章, 进一步学习了 attention 机制, 了解了 Transformer 的架构和 NLP 里的 Q,K,V 概念。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="论文阅读：Attention Is All You Need">
-<meta property="og:url" content="https://pandintelli.github.io/tree/master/2022/02/24/Transformer/index.html">
+<meta property="og:url" content="https://pandintelli.github.io/2022/02/24/Transformer/index.html">
 <meta property="og:site_name" content="Pand&#96;s Blog">
 <meta property="og:description" content="阅读了这篇文章, 进一步学习了 attention 机制, 了解了 Transformer 的架构和 NLP 里的 Q,K,V 概念。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://pandintelli.github.io/tree/master/index_img/Transformer.png">
+<meta property="og:image" content="https://pandintelli.github.io/index_img/Transformer.png">
 <meta property="article:published_time" content="2022-02-24T07:21:19.000Z">
 <meta property="article:modified_time" content="2023-04-21T11:53:18.670Z">
 <meta property="article:author" content="Pand">
 <meta property="article:tag" content="Transformer">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://pandintelli.github.io/tree/master/index_img/Transformer.png">
+<meta name="twitter:image" content="https://pandintelli.github.io/index_img/Transformer.png">
   
   
   
@@ -57,12 +57,12 @@
 <link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
 
 
-<link  rel="stylesheet" href="/tree/master/css/main.css" />
+<link  rel="stylesheet" href="/css/main.css" />
 
 
-  <link id="highlight-css" rel="stylesheet" href="/tree/master/css/highlight.css" />
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/tree/master/css/highlight-dark.css" />
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
   
 
 
@@ -71,15 +71,15 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"pandintelli.github.io","root":"/tree/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/tree/master/local-search.xml"};
+    var CONFIG = {"hostname":"pandintelli.github.io","root":"/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
       Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
     }
   </script>
-  <script  src="/tree/master/js/utils.js" ></script>
-  <script  src="/tree/master/js/color-schema.js" ></script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
   
 
 
@@ -96,7 +96,7 @@
 <div class="header-inner" style="height: 70vh;">
   <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
-    <a class="navbar-brand" href="/tree/master/">
+    <a class="navbar-brand" href="/">
       <strong>Pand`s Blog</strong>
     </a>
 
@@ -115,7 +115,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/tree/master/">
+              <a class="nav-link" href="/">
                 <i class="iconfont icon-home-fill"></i>
                 <span>首页</span>
               </a>
@@ -127,7 +127,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/tree/master/archives/">
+              <a class="nav-link" href="/archives/">
                 <i class="iconfont icon-archive-fill"></i>
                 <span>归档</span>
               </a>
@@ -139,7 +139,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/tree/master/categories/">
+              <a class="nav-link" href="/categories/">
                 <i class="iconfont icon-category-fill"></i>
                 <span>分类</span>
               </a>
@@ -151,7 +151,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/tree/master/tags/">
+              <a class="nav-link" href="/tags/">
                 <i class="iconfont icon-tags-fill"></i>
                 <span>标签</span>
               </a>
@@ -163,7 +163,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/tree/master/about/">
+              <a class="nav-link" href="/about/">
                 <i class="iconfont icon-user-fill"></i>
                 <span>关于</span>
               </a>
@@ -193,7 +193,7 @@
   
 
 <div id="banner" class="banner" parallax=true
-     style="background: url('/tree/master/img/default.png') no-repeat center center; background-size: cover;">
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
   <div class="full-bg-img">
     <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
       <div class="banner-text text-center fade-in-up">
@@ -290,31 +290,31 @@
 <p>Transformer is the first transduction model relying entirely on self-attention to compute representations of its input and output without using sequence aligned RNNs or convolution.</p>
 </blockquote>
 <h2 id="Transformer-详解"><a href="#Transformer-详解" class="headerlink" title="Transformer 详解"></a>Transformer 详解</h2><h3 id="High-level-Transformer"><a href="#High-level-Transformer" class="headerlink" title="High-level Transformer"></a>High-level Transformer</h3><p>论文中的验证 Transformer 的实验是基于机器翻译的，下面以机器翻译为例子详细剖析 Transformer 的结构，在机器翻译中，Transformer 可概括为下图：</p>
-<img src="the_transformer_3.png" srcset="/tree/master/img/loading.gif" lazyload alt="Transformer Structure"/>
+<img src="the_transformer_3.png" srcset="/img/loading.gif" lazyload alt="Transformer Structure"/>
 Transformer 的本质是一个 Encoder-Decoder 的结构，那么上图也可以表示为下面的结构：
 
-<img src="The_transformer_encoders_decoders.png" srcset="/tree/master/img/loading.gif" lazyload/>
+<img src="The_transformer_encoders_decoders.png" srcset="/img/loading.gif" lazyload/>
 
 <p>如论文中所设置的，编码器由6个编码block组成，同样解码器是6个解码block组成。与所有的生成模型相同的是，编码器的输出会作为解码器的输入，如图所示：</p>
-<img src="The_transformer_encoder_decoder_stack.png" srcset="/tree/master/img/loading.gif" lazyload alt="Transformer的Encoder和Decoder均由6个block堆叠而成"/>
+<img src="The_transformer_encoder_decoder_stack.png" srcset="/img/loading.gif" lazyload alt="Transformer的Encoder和Decoder均由6个block堆叠而成"/>
 
 <p>在 Transformer 的 Encoder 中，数据首先会经过一个叫做 <code>self-attention</code> 的模块得到一个加权之后的特征向量 $Z$，这个 $Z$ 便是下面公式中的 $Attention(Q,K,V)$：<br>$$<br>\text{Attention}(Q,K,V)&#x3D;\text{softmax}(\frac{QK^T}{\sqrt{d_k}})V<br>$$<br>得到 $Z$ 之后，他会被送进 encoder 的下一个模块，前馈神经网络中。这个全连接有两层，第一层的激活函数是 ReLU，第二层是一个线性激活函数，可以表示为：<br>$$<br>\text{FFN}(Z)&#x3D;\max (0,ZW_1+b_1)W_2+b_2<br>$$<br>Encoder 的结构如下图：</p>
-<img src="Transformer_encoder.png" srcset="/tree/master/img/loading.gif" lazyload alt="Transformer由self-attention和Feed Forward neural network组成"/>
+<img src="Transformer_encoder.png" srcset="/img/loading.gif" lazyload alt="Transformer由self-attention和Feed Forward neural network组成"/>
 
 <p>Decoder 的结构如下图右方所示，它和 Encoder 的不同之处在于 Decoder 多了一个 Encoder-Decoder Attention，两个 Attention 分别用于计算输入和输出的权值：</p>
 <ol>
 <li>Self-Attention：当前翻译和已经翻译的前文之间的关系；</li>
 <li>Encoder-Decnoder Attention：当前翻译和编码的特征向量之间的关系。</li>
 </ol>
-<img src="Transformer_decoder.png" srcset="/tree/master/img/loading.gif" lazyload alt="Transformer的解码器由self-attention，Encoder-Decoder attention以及FFNN组成"/>
+<img src="Transformer_decoder.png" srcset="/img/loading.gif" lazyload alt="Transformer的解码器由self-attention，Encoder-Decoder attention以及FFNN组成"/>
 
 
 
 <h3 id="输入编码"><a href="#输入编码" class="headerlink" title="输入编码"></a>输入编码</h3><p>首先通过 Word2Vec 等词嵌入方法将输入语料转化为特征向量，论文中使用的词嵌入的维度为 $d_{model}&#x3D;512$。</p>
-<img src="embeddings.png" srcset="/tree/master/img/loading.gif" lazyload alt="单词的输入编码"/>
+<img src="embeddings.png" srcset="/img/loading.gif" lazyload alt="单词的输入编码"/>
 
 <p>在最底层的block中， $x$ 将直接作为Transformer的输入，而在其他层中，输入则是上一个block的输出。</p>
-<img src="encoder_with_tensors_2.png" srcset="/tree/master/img/loading.gif" lazyload alt="输入编码作为一个Tensor输入到Encoder中"/>
+<img src="encoder_with_tensors_2.png" srcset="/img/loading.gif" lazyload alt="输入编码作为一个Tensor输入到Encoder中"/>
 
 
 
@@ -322,10 +322,10 @@ Transformer 的本质是一个 Encoder-Decoder 的结构，那么上图也可以
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">The animal didn&#x27;t cross the street because it was too tired.<br></code></pre></td></tr></table></figure>
 
 <p>通过加权之后可以得到类似下图的加权情况：</p>
-<img src="transformer_self-attention_visualization.png" srcset="/tree/master/img/loading.gif" lazyload alt="当我们在encoder中编码'it'时, "/>
+<img src="transformer_self-attention_visualization.png" srcset="/img/loading.gif" lazyload alt="当我们在encoder中编码'it'时, "/>
 
 <p>在 Self-attention 中，每个单词有3个不同的向量，分别是 Query 向量 (Q), Key 向量 (K) 和 Value 向量 (V)，长度均是64。它们是通过3个不同的权值矩阵由嵌入向量 $X$ 乘以三个不同的权值矩阵 $W^Q,W^K,W^V$ 得到，其中三个矩阵的尺寸也是相同的。均是 $512\times 64$。</p>
-<img src="transformer_self_attention_vectors.png" srcset="/tree/master/img/loading.gif" lazyload/>
+<img src="transformer_self_attention_vectors.png" srcset="/img/loading.gif" lazyload/>
 
 <p>$\text{q}_1&#x3D;X_1W^Q,\text{k}_1&#x3D;X_1W^K,\text{v}_1&#x3D;X_1W^V$</p>
 <p>为了理解 Query, Key, Value 的具体意义，我们继续往下看。Attention 的计算方法，整个过程可以分成 7 步。</p>
@@ -337,35 +337,35 @@ Transformer 的本质是一个 Encoder-Decoder 的结构，那么上图也可以
 <p>6、softmax 点乘 Value 值 $\text{v}$，得到加权的每个输入向量的评分 $\text{v}$；</p>
 <p>7、相加得到最终的输出结果 $z&#x3D;\sum v$。</p>
 <p>上面的步骤可以表示为下图的形式：</p>
-<img src="self-attention-output.png" srcset="/tree/master/img/loading.gif" lazyload alt="Self-Attention计算示例图"/>
+<img src="self-attention-output.png" srcset="/img/loading.gif" lazyload alt="Self-Attention计算示例图"/>
 
 <p>实际计算过程是分batch，采用基于矩阵的计算方式，论文中的 Q,K,V 的计算方式如图：</p>
-<img src="self-attention-matrix-calculation.png" srcset="/tree/master/img/loading.gif" lazyload alt="Q,K,V 计算的矩阵表示"/>
+<img src="self-attention-matrix-calculation.png" srcset="/img/loading.gif" lazyload alt="Q,K,V 计算的矩阵表示"/>
 
 <p>然后得到的矩阵再进行之前 softmax 计算 score 的步骤：</p>
-<img src="self-attention-matrix-calculation-2.png" srcset="/tree/master/img/loading.gif" lazyload alt="矩阵形式的 self-attention"/>
+<img src="self-attention-matrix-calculation-2.png" srcset="/img/loading.gif" lazyload alt="矩阵形式的 self-attention"/>
 
 <p>在self-attention需要强调的最后一点是其采用了残差网络中的short-cut结构，目的当然是解决深度学习中的退化问题，得到的最终结果如图：</p>
-<img src="transformer_resideual_layer_norm.png" srcset="/tree/master/img/loading.gif" lazyload alt="残差连接"/>
+<img src="transformer_resideual_layer_norm.png" srcset="/img/loading.gif" lazyload alt="残差连接"/>
 
 
 
 <h3 id="Multi-Head-Attention"><a href="#Multi-Head-Attention" class="headerlink" title="Multi-Head Attention"></a>Multi-Head Attention</h3><p>Multi-Head Attention 相当于是 $h$ 个 Attention 模块的集合，这里以 $h&#x3D;8$ 为例，输入一个句子，然后把每个词进行编码，然后分别输入到8个 Attention 中，最后将得到的 $Z$ 矩阵 concat 起来乘以权重 $W^O$，如下图所示：</p>
-<img src="transformer_multi-headed_self-attention-recap.png" srcset="/tree/master/img/loading.gif" lazyload alt="Multi-Head Attention"/>
+<img src="transformer_multi-headed_self-attention-recap.png" srcset="/img/loading.gif" lazyload alt="Multi-Head Attention"/>
 
 
 
 <h3 id="Encoder-Decoder-Attention"><a href="#Encoder-Decoder-Attention" class="headerlink" title="Encoder-Decoder Attention"></a>Encoder-Decoder Attention</h3><p>在解码器中，Transformer block比编码器中多了个encoder-cecoder attention。在encoder-decoder attention中， $Q$ 来自于解码器的上一个输出， $K$ 和 $V$ 则来自于与编码器的输出。</p>
 <p>由于在机器翻译中，解码过程是一个顺序操作的过程，也就是当解码第 $k$ 个特征向量时，我们只能看到第 $k-1$ 及其之前的解码结果，论文中把这种情况下的 multi-head attention 叫做 masked multi-head attention。</p>
 <h3 id="Full-Transformer"><a href="#Full-Transformer" class="headerlink" title="Full Transformer"></a>Full Transformer</h3><p>一个完整的网络结构便是 Encoder 和 Decoder 的堆叠（各 $N$ 个, $N&#x3D;6$），如图所示：</p>
-<img src="Transformer_Architecture.png" srcset="/tree/master/img/loading.gif" lazyload/>
+<img src="Transformer_Architecture.png" srcset="/img/loading.gif" lazyload/>
 
 
 
 <h2 id="位置编码"><a href="#位置编码" class="headerlink" title="位置编码"></a>位置编码</h2><p>截止目前为止，我们介绍的Transformer模型并没有捕捉顺序序列的能力，也就是说无论句子的结构怎么打乱，Transformer都会得到类似的结果。换句话说，Transformer只是一个功能更强大的词袋模型而已。</p>
 <p>为了解决这个问题，论文中在编码词向量时引入了位置编码（Position Embedding）的特征。具体地说，位置编码会在词向量中加入了单词的位置信息，这样Transformer就能区分不同位置的单词了。</p>
 <p>那么怎么编码这个位置信息呢？常见的模式有：a. 根据数据学习；b. 自己设计编码规则。在这里作者采用了第二种方式。通常位置编码是一个长度为 $d_{model}$ 的特征向量，这样便于和词向量进行单位加的操作。</p>
-<img src="transformer_positional_encoding_vectors.png" srcset="/tree/master/img/loading.gif" lazyload alt="Position Embedding"/>
+<img src="transformer_positional_encoding_vectors.png" srcset="/img/loading.gif" lazyload alt="Position Embedding"/>
 
 <p>论文给出的编码公式如下：<br>$$<br>\begin{aligned}<br>    PE(pos,2i)&amp;&#x3D;\sin (pos&#x2F;10000^{2i&#x2F;d_{model}})\<br>    PE(pos,2i+1)&amp;&#x3D;\cos(pos&#x2F;10000^{2i&#x2F;d_{model}})<br>\end{aligned}<br>$$<br>其中，$pos$ 表示单词的位置，$i$ 表示单词的维度。</p>
 <p>作者这么设计的原因是考虑到在NLP任务中，除了单词的绝对位置，单词的相对位置也非常重要。</p>
@@ -401,7 +401,7 @@ Transformer 的本质是一个 Encoder-Decoder 的结构，那么上图也可以
     
       <span class="category-chain">
         
-  <a href="/tree/master/categories/Paper-Reading/" class="category-chain-item">Paper Reading</a>
+  <a href="/categories/Paper-Reading/" class="category-chain-item">Paper Reading</a>
   
   
 
@@ -416,7 +416,7 @@ Transformer 的本质是一个 Encoder-Decoder 的结构，那么上图也可以
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tree/master/tags/Transformer/">#Transformer</a>
+        <a href="/tags/Transformer/">#Transformer</a>
       
     </div>
   
@@ -429,7 +429,7 @@ Transformer 的本质是一个 Encoder-Decoder 的结构，那么上图也可以
   <div class="license-box my-3">
     <div class="license-title">
       <div>论文阅读：Attention Is All You Need</div>
-      <div>https://pandintelli.github.io/tree/master/2022/02/24/Transformer/</div>
+      <div>https://pandintelli.github.io/2022/02/24/Transformer/</div>
     </div>
     <div class="license-meta">
       
@@ -473,7 +473,7 @@ Transformer 的本质是一个 Encoder-Decoder 的结构，那么上图也可以
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/tree/master/2022/03/05/Contrastive-Loss-hyper-parameter/" title="Contrastive Loss 中超参数τ的研究">
+                      <a href="/2022/03/05/Contrastive-Loss-hyper-parameter/" title="Contrastive Loss 中超参数τ的研究">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">Contrastive Loss 中超参数τ的研究</span>
                         <span class="visible-mobile">上一篇</span>
@@ -483,7 +483,7 @@ Transformer 的本质是一个 Encoder-Decoder 的结构，那么上图也可以
                   <article class="post-next col-6">
                     
                     
-                      <a href="/tree/master/2022/02/24/DistributedModelTraining/" title="PyTorch 分布式训练">
+                      <a href="/2022/02/24/DistributedModelTraining/" title="PyTorch 分布式训练">
                         <span class="hidden-mobile">PyTorch 分布式训练</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -616,7 +616,7 @@ Transformer 的本质是一个 Encoder-Decoder 的结构，那么上图也可以
         >
           
             <span style="visibility: hidden; width: 0">|</span>
-            <img src="/tree/master/img/police_beian.png" srcset="/tree/master/img/loading.gif" lazyload alt="police-icon"/>
+            <img src="/img/police_beian.png" srcset="/img/loading.gif" lazyload alt="police-icon"/>
           
           <span>川公网安备 51010702002729号</span>
         </a>
@@ -647,15 +647,15 @@ Transformer 的本质是一个 Encoder-Decoder 的结构，那么上图也可以
 
 <script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
 <script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
-<script  src="/tree/master/js/events.js" ></script>
-<script  src="/tree/master/js/plugins.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
 
 
 
 
 
   
-    <script  src="/tree/master/js/img-lazyload.js" ></script>
+    <script  src="/js/img-lazyload.js" ></script>
   
 
 
@@ -797,7 +797,7 @@ Transformer 的本质是一个 Encoder-Decoder 的结构，那么上图也可以
 
   <script  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" ></script>
 
-  <script  src="/tree/master/js/local-search.js" ></script>
+  <script  src="/js/local-search.js" ></script>
 
 
 
@@ -805,7 +805,7 @@ Transformer 的本质是一个 Encoder-Decoder 的结构，那么上图也可以
 
 <!-- 主题的启动项，将它保持在最底部 -->
 <!-- the boot of the theme, keep it at the bottom -->
-<script  src="/tree/master/js/boot.js" ></script>
+<script  src="/js/boot.js" ></script>
 
 
   
