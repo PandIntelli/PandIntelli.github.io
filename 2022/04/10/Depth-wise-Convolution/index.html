@@ -7,8 +7,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <link rel="apple-touch-icon" sizes="76x76" href="/master/img/aquaicon.png">
-  <link rel="icon" href="/master/img/aquaicon.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/tree/master/img/aquaicon.png">
+  <link rel="icon" href="/tree/master/img/aquaicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
@@ -19,17 +19,17 @@
     <meta name="description" content="深度分离卷积是一种将通道分开做卷积, 从而减小神经网络计算量的方法。本文对其原理和计算量进行简要介绍。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="深度分离卷积方法简介">
-<meta property="og:url" content="https://pandintelli.github.io/master/2022/04/10/Depth-wise-Convolution/index.html">
+<meta property="og:url" content="https://pandintelli.github.io/tree/master/2022/04/10/Depth-wise-Convolution/index.html">
 <meta property="og:site_name" content="Pand&#96;s Blog">
 <meta property="og:description" content="深度分离卷积是一种将通道分开做卷积, 从而减小神经网络计算量的方法。本文对其原理和计算量进行简要介绍。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://pandintelli.github.io/master/index_img/depth-wise%20conv.png">
+<meta property="og:image" content="https://pandintelli.github.io/tree/master/index_img/depth-wise%20conv.png">
 <meta property="article:published_time" content="2022-04-10T06:00:31.000Z">
 <meta property="article:modified_time" content="2023-04-21T11:53:16.370Z">
 <meta property="article:author" content="Pand">
 <meta property="article:tag" content="Hexo, Contrastive Learning, Research">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://pandintelli.github.io/master/index_img/depth-wise%20conv.png">
+<meta name="twitter:image" content="https://pandintelli.github.io/tree/master/index_img/depth-wise%20conv.png">
   
   
   
@@ -57,12 +57,12 @@
 <link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
 
 
-<link  rel="stylesheet" href="/master/css/main.css" />
+<link  rel="stylesheet" href="/tree/master/css/main.css" />
 
 
-  <link id="highlight-css" rel="stylesheet" href="/master/css/highlight.css" />
+  <link id="highlight-css" rel="stylesheet" href="/tree/master/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/master/css/highlight-dark.css" />
+    <link id="highlight-css-dark" rel="stylesheet" href="/tree/master/css/highlight-dark.css" />
   
 
 
@@ -71,15 +71,15 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"pandintelli.github.io","root":"/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/master/local-search.xml"};
+    var CONFIG = {"hostname":"pandintelli.github.io","root":"/tree/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/tree/master/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
       Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
     }
   </script>
-  <script  src="/master/js/utils.js" ></script>
-  <script  src="/master/js/color-schema.js" ></script>
+  <script  src="/tree/master/js/utils.js" ></script>
+  <script  src="/tree/master/js/color-schema.js" ></script>
   
 
 
@@ -96,7 +96,7 @@
 <div class="header-inner" style="height: 70vh;">
   <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
-    <a class="navbar-brand" href="/master/">
+    <a class="navbar-brand" href="/tree/master/">
       <strong>Pand`s Blog</strong>
     </a>
 
@@ -115,7 +115,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/">
+              <a class="nav-link" href="/tree/master/">
                 <i class="iconfont icon-home-fill"></i>
                 <span>首页</span>
               </a>
@@ -127,7 +127,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/archives/">
+              <a class="nav-link" href="/tree/master/archives/">
                 <i class="iconfont icon-archive-fill"></i>
                 <span>归档</span>
               </a>
@@ -139,7 +139,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/categories/">
+              <a class="nav-link" href="/tree/master/categories/">
                 <i class="iconfont icon-category-fill"></i>
                 <span>分类</span>
               </a>
@@ -151,7 +151,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/tags/">
+              <a class="nav-link" href="/tree/master/tags/">
                 <i class="iconfont icon-tags-fill"></i>
                 <span>标签</span>
               </a>
@@ -163,7 +163,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/about/">
+              <a class="nav-link" href="/tree/master/about/">
                 <i class="iconfont icon-user-fill"></i>
                 <span>关于</span>
               </a>
@@ -193,7 +193,7 @@
   
 
 <div id="banner" class="banner" parallax=true
-     style="background: url('/master/img/default.png') no-repeat center center; background-size: cover;">
+     style="background: url('/tree/master/img/default.png') no-repeat center center; background-size: cover;">
   <div class="full-bg-img">
     <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
       <div class="banner-text text-center fade-in-up">
@@ -280,14 +280,14 @@
                 
                 <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>相比于普通卷积，Depth-wise 卷积是一种可以减少FLOPs的卷积。但根据网上的评价，这种卷积在降低计算量的同时，会减慢推理速度；实际原因可能是Depth-wise采用的做法将存储瓶颈变为了计算瓶颈：减小了模型size，但在实际计算时需要的IO读取次数是普通卷积的100倍，增加了IO时间。</p>
 <h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>对于普通卷积，输入feature map为$HWC$，输出为$H_1W_1C_1$的情况。kernel size为$(k_1,k_2)$。那么FLOPs为：$k_1\times k_2\times C\times C_1$。</p>
-<img src="./Normal convolution.png" srcset="/master/img/loading.gif" lazyload style="zoom:80%;"/>
+<img src="./Normal convolution.png" srcset="/tree/master/img/loading.gif" lazyload style="zoom:80%;"/>
 
 <p>如上图所示，输入大小为$12\times 12\times 3$，kernel大小$5\times 5$，输出大小为$8\times 8\times 256$，参数量为：$5\times 5\times 3\times 256$。</p>
 <p>对于深度分离卷积，它将输入的每层channel分开计算卷积，再通过$1\times 1$卷积进行全channel的映射。</p>
-<img src="./Depth-wise convolution.png" srcset="/master/img/loading.gif" lazyload style="zoom:80%;"/>
+<img src="./Depth-wise convolution.png" srcset="/tree/master/img/loading.gif" lazyload style="zoom:80%;"/>
 
 <p>如图，每个channel先进行$5\times 5$大小的卷积操作，得到一个$8\times 8\times 3$的feature map。</p>
-<img src="./Pointwise convolution.png" srcset="/master/img/loading.gif" lazyload style="zoom:80%;"/>
+<img src="./Pointwise convolution.png" srcset="/tree/master/img/loading.gif" lazyload style="zoom:80%;"/>
 
 <p>再对$8\times 8\times 3$做$1\times 1$的卷积，进行全通道的映射。</p>
 <p>第一部分参数量为：$5\times 5\times 3$，第二部分参数量为：$1\times 1\times 3\times 256$。总参数量为$5\times 5\times 3+1\times 1\times 3\times 256$。</p>
@@ -353,7 +353,7 @@
     
       <span class="category-chain">
         
-  <a href="/master/categories/Miscellaneous/" class="category-chain-item">Miscellaneous</a>
+  <a href="/tree/master/categories/Miscellaneous/" class="category-chain-item">Miscellaneous</a>
   
   
 
@@ -374,7 +374,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>深度分离卷积方法简介</div>
-      <div>https://pandintelli.github.io/master/2022/04/10/Depth-wise-Convolution/</div>
+      <div>https://pandintelli.github.io/tree/master/2022/04/10/Depth-wise-Convolution/</div>
     </div>
     <div class="license-meta">
       
@@ -418,7 +418,7 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/master/2022/04/17/Interpreability-of-KD/" title="关于知识蒸馏温度T的一个简单解释(最优化函数拟合角度)">
+                      <a href="/tree/master/2022/04/17/Interpreability-of-KD/" title="关于知识蒸馏温度T的一个简单解释(最优化函数拟合角度)">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">关于知识蒸馏温度T的一个简单解释(最优化函数拟合角度)</span>
                         <span class="visible-mobile">上一篇</span>
@@ -428,7 +428,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/master/2022/03/29/MixFormer/" title="论文阅读：MixFormer: End-to-End Tracking with Iterative Mixed Attention">
+                      <a href="/tree/master/2022/03/29/MixFormer/" title="论文阅读：MixFormer: End-to-End Tracking with Iterative Mixed Attention">
                         <span class="hidden-mobile">论文阅读：MixFormer: End-to-End Tracking with Iterative Mixed Attention</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -561,7 +561,7 @@
         >
           
             <span style="visibility: hidden; width: 0">|</span>
-            <img src="/master/img/police_beian.png" srcset="/master/img/loading.gif" lazyload alt="police-icon"/>
+            <img src="/tree/master/img/police_beian.png" srcset="/tree/master/img/loading.gif" lazyload alt="police-icon"/>
           
           <span>川公网安备 51010702002729号</span>
         </a>
@@ -592,15 +592,15 @@
 
 <script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
 <script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
-<script  src="/master/js/events.js" ></script>
-<script  src="/master/js/plugins.js" ></script>
+<script  src="/tree/master/js/events.js" ></script>
+<script  src="/tree/master/js/plugins.js" ></script>
 
 
 
 
 
   
-    <script  src="/master/js/img-lazyload.js" ></script>
+    <script  src="/tree/master/js/img-lazyload.js" ></script>
   
 
 
@@ -742,7 +742,7 @@
 
   <script  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" ></script>
 
-  <script  src="/master/js/local-search.js" ></script>
+  <script  src="/tree/master/js/local-search.js" ></script>
 
 
 
@@ -750,7 +750,7 @@
 
 <!-- 主题的启动项，将它保持在最底部 -->
 <!-- the boot of the theme, keep it at the bottom -->
-<script  src="/master/js/boot.js" ></script>
+<script  src="/tree/master/js/boot.js" ></script>
 
 
   

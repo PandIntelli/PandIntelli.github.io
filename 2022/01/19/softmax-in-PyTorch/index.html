@@ -7,8 +7,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <link rel="apple-touch-icon" sizes="76x76" href="/master/img/aquaicon.png">
-  <link rel="icon" href="/master/img/aquaicon.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/tree/master/img/aquaicon.png">
+  <link rel="icon" href="/tree/master/img/aquaicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
@@ -19,17 +19,17 @@
     <meta name="description" content="softmax 作为可导的 max 函数，在各个方面都有应用。这里对 softmax 做个简单的总结，并介绍它在 argmax 函数中的应用。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="PyTorch 中的 softmax 函数解读">
-<meta property="og:url" content="https://pandintelli.github.io/master/2022/01/19/softmax-in-PyTorch/index.html">
+<meta property="og:url" content="https://pandintelli.github.io/tree/master/2022/01/19/softmax-in-PyTorch/index.html">
 <meta property="og:site_name" content="Pand&#96;s Blog">
 <meta property="og:description" content="softmax 作为可导的 max 函数，在各个方面都有应用。这里对 softmax 做个简单的总结，并介绍它在 argmax 函数中的应用。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://pandintelli.github.io/master/index_img/softmax.png">
+<meta property="og:image" content="https://pandintelli.github.io/tree/master/index_img/softmax.png">
 <meta property="article:published_time" content="2022-01-19T12:55:54.000Z">
 <meta property="article:modified_time" content="2023-04-21T11:53:18.660Z">
 <meta property="article:author" content="Pand">
 <meta property="article:tag" content="Hexo, Contrastive Learning, Research">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://pandintelli.github.io/master/index_img/softmax.png">
+<meta name="twitter:image" content="https://pandintelli.github.io/tree/master/index_img/softmax.png">
   
   
   
@@ -57,12 +57,12 @@
 <link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
 
 
-<link  rel="stylesheet" href="/master/css/main.css" />
+<link  rel="stylesheet" href="/tree/master/css/main.css" />
 
 
-  <link id="highlight-css" rel="stylesheet" href="/master/css/highlight.css" />
+  <link id="highlight-css" rel="stylesheet" href="/tree/master/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/master/css/highlight-dark.css" />
+    <link id="highlight-css-dark" rel="stylesheet" href="/tree/master/css/highlight-dark.css" />
   
 
 
@@ -71,15 +71,15 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"pandintelli.github.io","root":"/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/master/local-search.xml"};
+    var CONFIG = {"hostname":"pandintelli.github.io","root":"/tree/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/tree/master/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
       Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
     }
   </script>
-  <script  src="/master/js/utils.js" ></script>
-  <script  src="/master/js/color-schema.js" ></script>
+  <script  src="/tree/master/js/utils.js" ></script>
+  <script  src="/tree/master/js/color-schema.js" ></script>
   
 
 
@@ -96,7 +96,7 @@
 <div class="header-inner" style="height: 70vh;">
   <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
-    <a class="navbar-brand" href="/master/">
+    <a class="navbar-brand" href="/tree/master/">
       <strong>Pand`s Blog</strong>
     </a>
 
@@ -115,7 +115,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/">
+              <a class="nav-link" href="/tree/master/">
                 <i class="iconfont icon-home-fill"></i>
                 <span>首页</span>
               </a>
@@ -127,7 +127,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/archives/">
+              <a class="nav-link" href="/tree/master/archives/">
                 <i class="iconfont icon-archive-fill"></i>
                 <span>归档</span>
               </a>
@@ -139,7 +139,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/categories/">
+              <a class="nav-link" href="/tree/master/categories/">
                 <i class="iconfont icon-category-fill"></i>
                 <span>分类</span>
               </a>
@@ -151,7 +151,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/tags/">
+              <a class="nav-link" href="/tree/master/tags/">
                 <i class="iconfont icon-tags-fill"></i>
                 <span>标签</span>
               </a>
@@ -163,7 +163,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/about/">
+              <a class="nav-link" href="/tree/master/about/">
                 <i class="iconfont icon-user-fill"></i>
                 <span>关于</span>
               </a>
@@ -193,7 +193,7 @@
   
 
 <div id="banner" class="banner" parallax=true
-     style="background: url('/master/img/default.png') no-repeat center center; background-size: cover;">
+     style="background: url('/tree/master/img/default.png') no-repeat center center; background-size: cover;">
   <div class="full-bg-img">
     <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
       <div class="banner-text text-center fade-in-up">
@@ -285,7 +285,7 @@
 <p>那么为什么不直接求所占比例，而是求个指数？答案显而易见，为了凸显 <code>max</code> 值相对于其他值的大小，如下式：</p>
 <p>$e^{0.5}-e^{0.4}\approx 0.15689&gt;0.5-0.4&#x3D;0.1$。</p>
 <p>差距越大，采用指数的优势越明显，可以从 $f(x)&#x3D;x$ 和 $f(x)&#x3D;e^x$ 的图示中看出这点：</p>
-<img src="exp_x.png" srcset="/master/img/loading.gif" lazyload alt="一次函数和指数函数图示" style="zoom:80%;" />
+<img src="exp_x.png" srcset="/tree/master/img/loading.gif" lazyload alt="一次函数和指数函数图示" style="zoom:80%;" />
 
 <h2 id="softargmax"><a href="#softargmax" class="headerlink" title="softargmax"></a>softargmax</h2><p>为了解决 <code>argmax</code> 不可导的问题，引入 <code>softmax</code> ，由于 <code>softmax</code> 的值在最大值处接近 1，那么乘上对应的 index 就可以完成 <code>argmax</code> 的功能，<code>softargmax</code> 的函数如下：<br>$$<br>softargmax&#x3D;\sum\limits_i\frac{e^{x_i}}{\sum\limits_je^{x_j}}i<br>$$<br>但是这样有个问题，极大值和其他值的差距有可能不够明显，导致求得的值和真实的 <code>argmax</code> 有一定的差距：如 $2.7669$ 和 $3$，可以引入一个常量解决这个问题，改进后的 <code>softargmax</code> 函数如下：<br>$$<br>softargmax&#x3D;\sum\limits_i\frac{e^{\beta x_i}}{\sum\limits_je^{\beta x_j}}i<br>$$<br>$\beta$ 可以取个任何值，加了常量之后，极大值的凸显效应更加明显了(可以看上图中 $f(x)&#x3D;e^{10x}$ 和 $f(x)&#x3D;e^x$ 的对比。</p>
 <h2 id="logsoftmax"><a href="#logsoftmax" class="headerlink" title="logsoftmax"></a>logsoftmax</h2><p>但是 <code>softmax</code> 会有函数上溢的问题，也就是求指数函数之后值太大，所以解决方法就是对 <code>softmax</code> 求一个 log。</p>
@@ -312,12 +312,12 @@
     
       <span class="category-chain">
         
-  <a href="/master/categories/Coding/" class="category-chain-item">Coding</a>
+  <a href="/tree/master/categories/Coding/" class="category-chain-item">Coding</a>
   
   
     <span>></span>
     
-  <a href="/master/categories/Coding/PyTorch/" class="category-chain-item">PyTorch</a>
+  <a href="/tree/master/categories/Coding/PyTorch/" class="category-chain-item">PyTorch</a>
   
   
 
@@ -340,7 +340,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>PyTorch 中的 softmax 函数解读</div>
-      <div>https://pandintelli.github.io/master/2022/01/19/softmax-in-PyTorch/</div>
+      <div>https://pandintelli.github.io/tree/master/2022/01/19/softmax-in-PyTorch/</div>
     </div>
     <div class="license-meta">
       
@@ -384,7 +384,7 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/master/2022/01/20/CrossEntropyLoss/" title="PyTorch 中的 CrossEntropyLoss 及其具体应用">
+                      <a href="/tree/master/2022/01/20/CrossEntropyLoss/" title="PyTorch 中的 CrossEntropyLoss 及其具体应用">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">PyTorch 中的 CrossEntropyLoss 及其具体应用</span>
                         <span class="visible-mobile">上一篇</span>
@@ -394,7 +394,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/master/2022/01/18/tensorboard-application-in-PyTorch/" title="PyTorch 中 TensorBoard 可视化模块应用">
+                      <a href="/tree/master/2022/01/18/tensorboard-application-in-PyTorch/" title="PyTorch 中 TensorBoard 可视化模块应用">
                         <span class="hidden-mobile">PyTorch 中 TensorBoard 可视化模块应用</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -527,7 +527,7 @@
         >
           
             <span style="visibility: hidden; width: 0">|</span>
-            <img src="/master/img/police_beian.png" srcset="/master/img/loading.gif" lazyload alt="police-icon"/>
+            <img src="/tree/master/img/police_beian.png" srcset="/tree/master/img/loading.gif" lazyload alt="police-icon"/>
           
           <span>川公网安备 51010702002729号</span>
         </a>
@@ -558,15 +558,15 @@
 
 <script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
 <script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
-<script  src="/master/js/events.js" ></script>
-<script  src="/master/js/plugins.js" ></script>
+<script  src="/tree/master/js/events.js" ></script>
+<script  src="/tree/master/js/plugins.js" ></script>
 
 
 
 
 
   
-    <script  src="/master/js/img-lazyload.js" ></script>
+    <script  src="/tree/master/js/img-lazyload.js" ></script>
   
 
 
@@ -708,7 +708,7 @@
 
   <script  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" ></script>
 
-  <script  src="/master/js/local-search.js" ></script>
+  <script  src="/tree/master/js/local-search.js" ></script>
 
 
 
@@ -716,7 +716,7 @@
 
 <!-- 主题的启动项，将它保持在最底部 -->
 <!-- the boot of the theme, keep it at the bottom -->
-<script  src="/master/js/boot.js" ></script>
+<script  src="/tree/master/js/boot.js" ></script>
 
 
   

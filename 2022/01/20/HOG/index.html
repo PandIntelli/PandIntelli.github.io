@@ -7,8 +7,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <link rel="apple-touch-icon" sizes="76x76" href="/master/img/aquaicon.png">
-  <link rel="icon" href="/master/img/aquaicon.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/tree/master/img/aquaicon.png">
+  <link rel="icon" href="/tree/master/img/aquaicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
@@ -19,17 +19,17 @@
     <meta name="description" content="方向梯度直方图 (Histogram of oriented gradient, HOG) 是应用在计算机视觉和图像处理领域，用于目标检测的特征描述器。本文介绍它的实现原理和一个应用实例。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Histogram of oriented gradient, HOG">
-<meta property="og:url" content="https://pandintelli.github.io/master/2022/01/20/HOG/index.html">
+<meta property="og:url" content="https://pandintelli.github.io/tree/master/2022/01/20/HOG/index.html">
 <meta property="og:site_name" content="Pand&#96;s Blog">
 <meta property="og:description" content="方向梯度直方图 (Histogram of oriented gradient, HOG) 是应用在计算机视觉和图像处理领域，用于目标检测的特征描述器。本文介绍它的实现原理和一个应用实例。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://pandintelli.github.io/master/index_img/HOG.jpg">
+<meta property="og:image" content="https://pandintelli.github.io/tree/master/index_img/HOG.jpg">
 <meta property="article:published_time" content="2022-01-20T13:12:11.000Z">
 <meta property="article:modified_time" content="2023-04-21T11:53:17.330Z">
 <meta property="article:author" content="Pand">
 <meta property="article:tag" content="Hexo, Contrastive Learning, Research">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://pandintelli.github.io/master/index_img/HOG.jpg">
+<meta name="twitter:image" content="https://pandintelli.github.io/tree/master/index_img/HOG.jpg">
   
   
   
@@ -57,12 +57,12 @@
 <link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
 
 
-<link  rel="stylesheet" href="/master/css/main.css" />
+<link  rel="stylesheet" href="/tree/master/css/main.css" />
 
 
-  <link id="highlight-css" rel="stylesheet" href="/master/css/highlight.css" />
+  <link id="highlight-css" rel="stylesheet" href="/tree/master/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/master/css/highlight-dark.css" />
+    <link id="highlight-css-dark" rel="stylesheet" href="/tree/master/css/highlight-dark.css" />
   
 
 
@@ -71,15 +71,15 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"pandintelli.github.io","root":"/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/master/local-search.xml"};
+    var CONFIG = {"hostname":"pandintelli.github.io","root":"/tree/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/tree/master/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
       Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
     }
   </script>
-  <script  src="/master/js/utils.js" ></script>
-  <script  src="/master/js/color-schema.js" ></script>
+  <script  src="/tree/master/js/utils.js" ></script>
+  <script  src="/tree/master/js/color-schema.js" ></script>
   
 
 
@@ -96,7 +96,7 @@
 <div class="header-inner" style="height: 70vh;">
   <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
-    <a class="navbar-brand" href="/master/">
+    <a class="navbar-brand" href="/tree/master/">
       <strong>Pand`s Blog</strong>
     </a>
 
@@ -115,7 +115,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/">
+              <a class="nav-link" href="/tree/master/">
                 <i class="iconfont icon-home-fill"></i>
                 <span>首页</span>
               </a>
@@ -127,7 +127,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/archives/">
+              <a class="nav-link" href="/tree/master/archives/">
                 <i class="iconfont icon-archive-fill"></i>
                 <span>归档</span>
               </a>
@@ -139,7 +139,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/categories/">
+              <a class="nav-link" href="/tree/master/categories/">
                 <i class="iconfont icon-category-fill"></i>
                 <span>分类</span>
               </a>
@@ -151,7 +151,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/tags/">
+              <a class="nav-link" href="/tree/master/tags/">
                 <i class="iconfont icon-tags-fill"></i>
                 <span>标签</span>
               </a>
@@ -163,7 +163,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/about/">
+              <a class="nav-link" href="/tree/master/about/">
                 <i class="iconfont icon-user-fill"></i>
                 <span>关于</span>
               </a>
@@ -193,7 +193,7 @@
   
 
 <div id="banner" class="banner" parallax=true
-     style="background: url('/master/img/default.png') no-repeat center center; background-size: cover;">
+     style="background: url('/tree/master/img/default.png') no-repeat center center; background-size: cover;">
   <div class="full-bg-img">
     <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
       <div class="banner-text text-center fade-in-up">
@@ -293,7 +293,7 @@
 <p>gamma 矫正公式：<br>$$<br>f(x)&#x3D;x^\gamma<br>$$<br>输出是输入的幂函数，指数为$\gamma$，典型的Gamma值是0.45。</p>
 <h2 id="计算图像像素梯度图"><a href="#计算图像像素梯度图" class="headerlink" title="计算图像像素梯度图"></a>计算图像像素梯度图</h2><p>对于一个像素点 $L(x,y)$ 来说，在水平方向和竖直方向有两个梯度 $g_x$ 和 $g_y$：<br>$$<br>g_x&#x3D;\frac{L(x+1,y)-L(x-1,y)}{2}\<br>g_y&#x3D;\frac{L(x,y+1)-L(x,y-1)}{2}<br>$$<br>总的梯度大小为：<br>$$<br>g&#x3D;\sqrt{g_x^2+g_y^2}<br>$$<br>梯度的方向为：<br>$$<br>\theta(x,y)&#x3D;\arctan {\frac{g_y}{g_x}}<br>$$<br>梯度方向取绝对值，因此得到的角度范围是 $[0°,180°]$。</p>
 <p>上面的计算过程，可以用下面的两个 kernel 函数很简单的实现。</p>
-<img src="sobel_kernel.jpg" srcset="/master/img/loading.gif" lazyload/>
+<img src="sobel_kernel.jpg" srcset="/tree/master/img/loading.gif" lazyload/>
 
 <p>我们也可以通过 OpenCV 中 size&#x3D;1 的 Sobel 算子来实现。代码如下：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python">gx = cv2.Sobel(img, cv2.CV_32F, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, ksize=<span class="hljs-number">1</span>)<br>gy = cv2.Sobel(img, cv2.CV_32F, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, ksize=<span class="hljs-number">1</span>)<br>mag, angle = cv2.cartToPolar(gx, gy, angleInDegrees=<span class="hljs-literal">True</span>)<br></code></pre></td></tr></table></figure>
@@ -306,14 +306,14 @@
 </ul>
 <p>所以 HOG 特征选择联合 $8\times 8$ 大小的 cell 内部的像素，计算其梯度幅度和梯度方向的统计直方图。由此一来，需要计算的数值就大量减少了。</p>
 <p>梯度方向取值范围为 $[0°,180°]$，以每 $20°$ 一个单元，可以划分为9组。然后把 cell 内部的值先通过角度划分到对应的 bin 内，然后再把大小赋给这个 bin，具体如下图所示。</p>
-<img src="histogram_1.png" srcset="/master/img/loading.gif" lazyload/>
+<img src="histogram_1.png" srcset="/tree/master/img/loading.gif" lazyload/>
 
 <p>蓝圈角度为80°，划分到80的 bin，大小2，也赋给这个 bin。红圈角度10°，介于0和20之间，所以两个 bin 各分一半。</p>
 <p>这里有一个细节，如果角度大于160，那么我们要考虑均匀分配，如下图。</p>
-<img src="histogram_2.png" srcset="/master/img/loading.gif" lazyload/>
+<img src="histogram_2.png" srcset="/tree/master/img/loading.gif" lazyload/>
 
 <p>最终我们可以得到下面这样的直方图：</p>
-<img src="histogram_3.png" srcset="/master/img/loading.gif" lazyload/>
+<img src="histogram_3.png" srcset="/tree/master/img/loading.gif" lazyload/>
 
 <p>从上图可以看到，更多的点的梯度方向是倾向于0度和160度，也就是说这些点的梯度方向是向上或者向下，表明图像这个位置存在比较明显的横向边缘。因此HOG是对边角敏感的，由于这样的统计方法，也是对部分像素值变化不敏感的，所以能够适应不同的环境。</p>
 <p>至于为什么选取 $8\times 8$ 为一个单元格，是因为HOG特征当初设计时是用来做行人检测的。在行人图片中 $8\times 8$ 的矩阵足以捕获一些特征，比如脸部或者头部特征等。</p>
@@ -324,9 +324,9 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt<br><span class="hljs-keyword">import</span> cv2<br><span class="hljs-keyword">from</span> skimage.feature <span class="hljs-keyword">import</span> hog<br><span class="hljs-keyword">from</span> skimage <span class="hljs-keyword">import</span> data, exposure<br>image = cv2.imread(<span class="hljs-string">&#x27;./00000001.png&#x27;</span>)<br><br>fd, hog_image = hog(image, orientations=<span class="hljs-number">8</span>, pixels_per_cell=(<span class="hljs-number">16</span>, <span class="hljs-number">16</span>),<br>                    cells_per_block=(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>), visualize=<span class="hljs-literal">True</span>, multichannel=<span class="hljs-literal">True</span>)<br>fig, (ax1, ax2) = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">8</span>, <span class="hljs-number">4</span>), sharex=<span class="hljs-literal">True</span>, sharey=<span class="hljs-literal">True</span>)<br>ax1.axis(<span class="hljs-string">&#x27;off&#x27;</span>)<br>ax1.imshow(image, cmap=plt.cm.gray)<br>ax1.set_title(<span class="hljs-string">&#x27;Input image&#x27;</span>)<br><span class="hljs-comment"># Rescale histogram for better display</span><br>hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>))<br>ax2.axis(<span class="hljs-string">&#x27;off&#x27;</span>)<br>ax2.imshow(hog_image_rescaled, cmap=plt.cm.gray)<br>ax2.set_title(<span class="hljs-string">&#x27;Histogram of Oriented Gradients&#x27;</span>)<br>plt.show()<br></code></pre></td></tr></table></figure>
 
 <p>实现效果如下：</p>
-<img src="image1.png" srcset="/master/img/loading.gif" lazyload/>
+<img src="image1.png" srcset="/tree/master/img/loading.gif" lazyload/>
 
-<img src="image2.png" srcset="/master/img/loading.gif" lazyload/>
+<img src="image2.png" srcset="/tree/master/img/loading.gif" lazyload/>
 
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
 <li>[1] <a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E6%96%B9%E5%90%91%E6%A2%AF%E5%BA%A6%E7%9B%B4%E6%96%B9%E5%9B%BE">Wikipedia: 方向梯度直方图</a></li>
@@ -350,7 +350,7 @@
     
       <span class="category-chain">
         
-  <a href="/master/categories/Others/" class="category-chain-item">Others</a>
+  <a href="/tree/master/categories/Others/" class="category-chain-item">Others</a>
   
   
 
@@ -371,7 +371,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>Histogram of oriented gradient, HOG</div>
-      <div>https://pandintelli.github.io/master/2022/01/20/HOG/</div>
+      <div>https://pandintelli.github.io/tree/master/2022/01/20/HOG/</div>
     </div>
     <div class="license-meta">
       
@@ -415,7 +415,7 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/master/2022/02/17/BriefIntroductionOfDomainAdaptation/" title="Domain Adaptation 简介">
+                      <a href="/tree/master/2022/02/17/BriefIntroductionOfDomainAdaptation/" title="Domain Adaptation 简介">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">Domain Adaptation 简介</span>
                         <span class="visible-mobile">上一篇</span>
@@ -425,7 +425,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/master/2022/01/20/Masked-Autoencoders-Are-Scalable-Vision-Learners/" title="论文阅读：Masked Autoencoders Are Scalable Vision Learners">
+                      <a href="/tree/master/2022/01/20/Masked-Autoencoders-Are-Scalable-Vision-Learners/" title="论文阅读：Masked Autoencoders Are Scalable Vision Learners">
                         <span class="hidden-mobile">论文阅读：Masked Autoencoders Are Scalable Vision Learners</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -558,7 +558,7 @@
         >
           
             <span style="visibility: hidden; width: 0">|</span>
-            <img src="/master/img/police_beian.png" srcset="/master/img/loading.gif" lazyload alt="police-icon"/>
+            <img src="/tree/master/img/police_beian.png" srcset="/tree/master/img/loading.gif" lazyload alt="police-icon"/>
           
           <span>川公网安备 51010702002729号</span>
         </a>
@@ -589,15 +589,15 @@
 
 <script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
 <script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
-<script  src="/master/js/events.js" ></script>
-<script  src="/master/js/plugins.js" ></script>
+<script  src="/tree/master/js/events.js" ></script>
+<script  src="/tree/master/js/plugins.js" ></script>
 
 
 
 
 
   
-    <script  src="/master/js/img-lazyload.js" ></script>
+    <script  src="/tree/master/js/img-lazyload.js" ></script>
   
 
 
@@ -739,7 +739,7 @@
 
   <script  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" ></script>
 
-  <script  src="/master/js/local-search.js" ></script>
+  <script  src="/tree/master/js/local-search.js" ></script>
 
 
 
@@ -747,7 +747,7 @@
 
 <!-- 主题的启动项，将它保持在最底部 -->
 <!-- the boot of the theme, keep it at the bottom -->
-<script  src="/master/js/boot.js" ></script>
+<script  src="/tree/master/js/boot.js" ></script>
 
 
   

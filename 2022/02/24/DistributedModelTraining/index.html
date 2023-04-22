@@ -7,8 +7,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <link rel="apple-touch-icon" sizes="76x76" href="/master/img/aquaicon.png">
-  <link rel="icon" href="/master/img/aquaicon.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/tree/master/img/aquaicon.png">
+  <link rel="icon" href="/tree/master/img/aquaicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
@@ -19,18 +19,18 @@
     <meta name="description" content="本文介绍 PyTorch 上进行多机多卡分布式训练的原理和操作方法，以便于训练神经网络时获得显著的性能提升。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="PyTorch 分布式训练">
-<meta property="og:url" content="https://pandintelli.github.io/master/2022/02/24/DistributedModelTraining/index.html">
+<meta property="og:url" content="https://pandintelli.github.io/tree/master/2022/02/24/DistributedModelTraining/index.html">
 <meta property="og:site_name" content="Pand&#96;s Blog">
 <meta property="og:description" content="本文介绍 PyTorch 上进行多机多卡分布式训练的原理和操作方法，以便于训练神经网络时获得显著的性能提升。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://pandintelli.github.io/master/index_img/horovod.png">
+<meta property="og:image" content="https://pandintelli.github.io/tree/master/index_img/horovod.png">
 <meta property="article:published_time" content="2022-02-24T01:29:37.000Z">
 <meta property="article:modified_time" content="2023-04-21T11:53:17.280Z">
 <meta property="article:author" content="Pand">
 <meta property="article:tag" content="Distribute">
 <meta property="article:tag" content="PyTorch">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://pandintelli.github.io/master/index_img/horovod.png">
+<meta name="twitter:image" content="https://pandintelli.github.io/tree/master/index_img/horovod.png">
   
   
   
@@ -58,12 +58,12 @@
 <link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
 
 
-<link  rel="stylesheet" href="/master/css/main.css" />
+<link  rel="stylesheet" href="/tree/master/css/main.css" />
 
 
-  <link id="highlight-css" rel="stylesheet" href="/master/css/highlight.css" />
+  <link id="highlight-css" rel="stylesheet" href="/tree/master/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/master/css/highlight-dark.css" />
+    <link id="highlight-css-dark" rel="stylesheet" href="/tree/master/css/highlight-dark.css" />
   
 
 
@@ -72,15 +72,15 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"pandintelli.github.io","root":"/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/master/local-search.xml"};
+    var CONFIG = {"hostname":"pandintelli.github.io","root":"/tree/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/tree/master/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
       Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
     }
   </script>
-  <script  src="/master/js/utils.js" ></script>
-  <script  src="/master/js/color-schema.js" ></script>
+  <script  src="/tree/master/js/utils.js" ></script>
+  <script  src="/tree/master/js/color-schema.js" ></script>
   
 
 
@@ -97,7 +97,7 @@
 <div class="header-inner" style="height: 70vh;">
   <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
-    <a class="navbar-brand" href="/master/">
+    <a class="navbar-brand" href="/tree/master/">
       <strong>Pand`s Blog</strong>
     </a>
 
@@ -116,7 +116,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/">
+              <a class="nav-link" href="/tree/master/">
                 <i class="iconfont icon-home-fill"></i>
                 <span>首页</span>
               </a>
@@ -128,7 +128,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/archives/">
+              <a class="nav-link" href="/tree/master/archives/">
                 <i class="iconfont icon-archive-fill"></i>
                 <span>归档</span>
               </a>
@@ -140,7 +140,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/categories/">
+              <a class="nav-link" href="/tree/master/categories/">
                 <i class="iconfont icon-category-fill"></i>
                 <span>分类</span>
               </a>
@@ -152,7 +152,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/tags/">
+              <a class="nav-link" href="/tree/master/tags/">
                 <i class="iconfont icon-tags-fill"></i>
                 <span>标签</span>
               </a>
@@ -164,7 +164,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/about/">
+              <a class="nav-link" href="/tree/master/about/">
                 <i class="iconfont icon-user-fill"></i>
                 <span>关于</span>
               </a>
@@ -194,7 +194,7 @@
   
 
 <div id="banner" class="banner" parallax=true
-     style="background: url('/master/img/default.png') no-repeat center center; background-size: cover;">
+     style="background: url('/tree/master/img/default.png') no-repeat center center; background-size: cover;">
   <div class="full-bg-img">
     <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
       <div class="banner-text text-center fade-in-up">
@@ -283,34 +283,34 @@
 <p>在将神经网络的训练并行化到许多GPU上时，必须选择如何将不同的操作分配到可用的不同GPU上。 在这里，我们重点介绍一种称为数据并行随机梯度下降（SGD）的技术。 与标准SGD中一样，梯度下降是对数据子集（mini-batch）进行的，需要进行多次迭代才能遍历整个数据集。 但是，在数据并行训练中，每个GPU都具有整个神经网络模型的完整副本，并且对于每次迭代，mini-batch中仅分配了样本的子集。 对于每次迭代，每个GPU都会在其数据上进行网络的正向传播和反向传播，以计算相对于网络参数的损耗梯度。</p>
 <p>最后，GPU彼此通信以平均不同GPU计算的梯度，将平均梯度应用于权重以获得新的权重。 所有GPU都以锁定步长(lock-step)进行迭代，一旦GPU完成迭代，它就必须等待所有其他GPU完成迭代，才能正确地更新权重。 这等效于在单个GPU上执行SGD，但是我们通过在多个GPU之间分配数据并并行进行计算来获得加速。</p>
 <h2 id="两种架构"><a href="#两种架构" class="headerlink" title="两种架构"></a>两种架构</h2><h3 id="TreeAllReduce"><a href="#TreeAllReduce" class="headerlink" title="TreeAllReduce"></a>TreeAllReduce</h3><p>这种架构如图所示。采用这种计算模型的分布式，通常会遇到网络的问题，随着 <code>worker</code> 数量的增加，其加速比会迅速地恶化，需要借助其他辅助技术。</p>
-<img src="master-slave-gpus.png" srcset="/master/img/loading.gif" lazyload  alt= "Data transfer to and from a single reducer GPU"/>
+<img src="master-slave-gpus.png" srcset="/tree/master/img/loading.gif" lazyload  alt= "Data transfer to and from a single reducer GPU"/>
 
 <p>由于某一个 <code>GPU</code> 需要接收其他所有 <code>GPU</code> 的梯度，并求平均以及 <code>broadcast</code> 回去，通信成本随 <code>GPU</code> 的数量线性增加。</p>
 <h3 id="RingAllReduce"><a href="#RingAllReduce" class="headerlink" title="RingAllReduce"></a>RingAllReduce</h3><p>这种架构的特点是：通信成本是恒定的，并且与系统中GPU的数量无关，并且仅有系统中GPU之间最慢的连接确定。</p>
-<img src="ring-gpus.png" srcset="/master/img/loading.gif" lazyload alt="GPUs arranged in a logical ring"/>
+<img src="ring-gpus.png" srcset="/tree/master/img/loading.gif" lazyload alt="GPUs arranged in a logical ring"/>
 
 <p>如图所示，在 <code>RingAllRedce</code> 中，<code>GPU</code> 集群被组织成一个逻辑环，每个 <code>GPU</code> 只从左邻居接受数据、并发送数据给右邻居，即每次同步每个 <code>GPU</code> 只获得部分梯度更新，等一个完整的 <code>Ring</code> 完成，每个 <code>GPU</code> 都获得了完整的参数。</p>
 <p>该算法分两个步骤进行：首先是 scatter reduce，然后是 all gather。在 scatter reduce 步骤中，<code>GPU</code> 将交换数据，以使每个 <code>GPU</code> 获得最终结果的一部分。在 all gather 步骤中，<code>GPU</code> 将交换这些块，以使所有 <code>GPU</code> 获得完整的最终结果。</p>
 <h2 id="详细流程"><a href="#详细流程" class="headerlink" title="详细流程"></a>详细流程</h2><h3 id="The-Scatter-Reduce"><a href="#The-Scatter-Reduce" class="headerlink" title="The Scatter-Reduce"></a>The Scatter-Reduce</h3><p>为了简单起见，我们假设目标是按元素逐个汇总一个大型浮点数数组中的所有元素； 系统中有N个 <code>GPU</code>，每个 <code>GPU</code> 都有一个相同大小的数组，并且在all reduce结束，每个 <code>GPU</code> 都应具有相同大小的数组，其中包含原始数组中数字的总和。</p>
 <p>首先，<code>GPU</code> 将阵列划分为N个较小的块（其中N是环中 <code>GPU</code> 的数量）。</p>
-<img src="array-partition.png" srcset="/master/img/loading.gif" lazyload alt="Partitioning of an array into N chunks"/>
+<img src="array-partition.png" srcset="/tree/master/img/loading.gif" lazyload alt="Partitioning of an array into N chunks"/>
 
 <p>接下来，<code>GPU</code> 将执行 scatter reduce 的 N-1 次迭代； 在每次迭代中，<code>GPU</code> 都会将其块之一发送到其右邻居，并从其左邻居接收一个块，并累积到该块中。 每个GPU发送和接收的块在每次迭代中都不同。 第 N 个GPU从发送块N 和接收块 N – 1 开始，然后从那里向后进行，每次迭代都发送在上一次迭代中接收到的块。</p>
 <p>例如，在第一次迭代中，上图中的五个 <code>GPU</code> 将发送和接收以下块：</p>
-<img src="scatter-reduce-iteration-1.png" srcset="/master/img/loading.gif" lazyload alt="Data transfers in the first iteration of scatter-reduce"/>
+<img src="scatter-reduce-iteration-1.png" srcset="/tree/master/img/loading.gif" lazyload alt="Data transfers in the first iteration of scatter-reduce"/>
 
 <p>在第一个发送和接收完成之后，每个 <code>GPU</code> 将具有一个块，该块由两个不同 <code>GPU</code> 上相同块的总和组成。 例如，第二个 <code>GPU</code> 上的第一个块将是来自第二个 <code>GPU</code> 和第一个 <code>GPU</code> 的那个块中的值之和。</p>
-<img src="scatter-reduce-iteration-2.png" srcset="/master/img/loading.gif" lazyload alt="Itermediate sums after the first iteration of scatter-reduce is complete"/>
+<img src="scatter-reduce-iteration-2.png" srcset="/tree/master/img/loading.gif" lazyload alt="Itermediate sums after the first iteration of scatter-reduce is complete"/>
 
 <p>在接下来的迭代中，该过程继续进行，到最后，每个 <code>GPU</code> 将具有一个块，其中包含所有 <code>GPU</code> 中该块中所有值的总和。 下图显示了 scatter reduce 完成后的结果。</p>
-<img src="scatter-reduce-iteration-done.png" srcset="/master/img/loading.gif" lazyload alt="Final state after all scatter-reduce transfers"/>
+<img src="scatter-reduce-iteration-done.png" srcset="/tree/master/img/loading.gif" lazyload alt="Final state after all scatter-reduce transfers"/>
 
 <h3 id="The-Allgather"><a href="#The-Allgather" class="headerlink" title="The Allgather"></a>The Allgather</h3><p>ring allgather 与 scatter reduce 相同（发送和接收进行 N-1 次迭代）相同，除了它们不累积 <code>GPU</code> 接收的值，而是简单地覆盖块。 第 N 个 <code>GPU</code> 首先发送第 N + 1 个块并接收第 N 个块，然后在以后的迭代中始终发送它刚接收的块。</p>
 <p>例如，在我们的五个 <code>GPU</code> 设置的第一个迭代中，<code>GPU</code> 将发送和接收以下块：</p>
-<img src="allgather-iteration-1.png" srcset="/master/img/loading.gif" lazyload alt="Data transfers in the first iteration of the allgather"/>
+<img src="allgather-iteration-1.png" srcset="/tree/master/img/loading.gif" lazyload alt="Data transfers in the first iteration of the allgather"/>
 
 <p>在接下来的迭代中，该过程继续进行，最后，每个GPU将具有整个阵列的完全累加值。下图显示了 Allgather 完成后的结果。</p>
-<img src="allgather-iteration-done.png" srcset="/master/img/loading.gif" lazyload alt="Final state after all allgather transfers"/>
+<img src="allgather-iteration-done.png" srcset="/tree/master/img/loading.gif" lazyload alt="Final state after all allgather transfers"/>
 
 <h3 id="在深度学习上的应用"><a href="#在深度学习上的应用" class="headerlink" title="在深度学习上的应用"></a>在深度学习上的应用</h3><p>为了最小化通信开销，我们可以利用神经网络的结构。 在每次迭代中，每个GPU都运行正向传播以计算误差，然后运行反向传播以计算神经网络的每个参数的梯度。 反向传播计算从输出层开始并向输入层移动，这意味着输出层参数的梯度在较早层的梯度之前明显可用。 由于Allreduce一次可以对网络参数的一个子集进行操作，因此我们可以在输出层参数上开始Allreduce，而其他梯度仍在计算中。 这样做会使通信与反向传播步骤中的其余计算重叠，从而减少了每个GPU最终等待通信完成的总时间。</p>
 <h2 id="PyTorch-分布式训练"><a href="#PyTorch-分布式训练" class="headerlink" title="PyTorch 分布式训练"></a>PyTorch 分布式训练</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><table>
@@ -402,12 +402,12 @@
     
       <span class="category-chain">
         
-  <a href="/master/categories/Coding/" class="category-chain-item">Coding</a>
+  <a href="/tree/master/categories/Coding/" class="category-chain-item">Coding</a>
   
   
     <span>></span>
     
-  <a href="/master/categories/Coding/PyTorch/" class="category-chain-item">PyTorch</a>
+  <a href="/tree/master/categories/Coding/PyTorch/" class="category-chain-item">PyTorch</a>
   
   
 
@@ -424,9 +424,9 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/master/tags/Distribute/">#Distribute</a>
+        <a href="/tree/master/tags/Distribute/">#Distribute</a>
       
-        <a href="/master/tags/PyTorch/">#PyTorch</a>
+        <a href="/tree/master/tags/PyTorch/">#PyTorch</a>
       
     </div>
   
@@ -439,7 +439,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>PyTorch 分布式训练</div>
-      <div>https://pandintelli.github.io/master/2022/02/24/DistributedModelTraining/</div>
+      <div>https://pandintelli.github.io/tree/master/2022/02/24/DistributedModelTraining/</div>
     </div>
     <div class="license-meta">
       
@@ -483,7 +483,7 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/master/2022/02/24/Transformer/" title="论文阅读：Attention Is All You Need">
+                      <a href="/tree/master/2022/02/24/Transformer/" title="论文阅读：Attention Is All You Need">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">论文阅读：Attention Is All You Need</span>
                         <span class="visible-mobile">上一篇</span>
@@ -493,7 +493,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/master/2022/02/23/ResNet/" title="论文阅读：Deep Residual Learning for Image Recognition">
+                      <a href="/tree/master/2022/02/23/ResNet/" title="论文阅读：Deep Residual Learning for Image Recognition">
                         <span class="hidden-mobile">论文阅读：Deep Residual Learning for Image Recognition</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -626,7 +626,7 @@
         >
           
             <span style="visibility: hidden; width: 0">|</span>
-            <img src="/master/img/police_beian.png" srcset="/master/img/loading.gif" lazyload alt="police-icon"/>
+            <img src="/tree/master/img/police_beian.png" srcset="/tree/master/img/loading.gif" lazyload alt="police-icon"/>
           
           <span>川公网安备 51010702002729号</span>
         </a>
@@ -657,15 +657,15 @@
 
 <script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
 <script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
-<script  src="/master/js/events.js" ></script>
-<script  src="/master/js/plugins.js" ></script>
+<script  src="/tree/master/js/events.js" ></script>
+<script  src="/tree/master/js/plugins.js" ></script>
 
 
 
 
 
   
-    <script  src="/master/js/img-lazyload.js" ></script>
+    <script  src="/tree/master/js/img-lazyload.js" ></script>
   
 
 
@@ -807,7 +807,7 @@
 
   <script  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" ></script>
 
-  <script  src="/master/js/local-search.js" ></script>
+  <script  src="/tree/master/js/local-search.js" ></script>
 
 
 
@@ -815,7 +815,7 @@
 
 <!-- 主题的启动项，将它保持在最底部 -->
 <!-- the boot of the theme, keep it at the bottom -->
-<script  src="/master/js/boot.js" ></script>
+<script  src="/tree/master/js/boot.js" ></script>
 
 
   

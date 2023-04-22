@@ -7,8 +7,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <link rel="apple-touch-icon" sizes="76x76" href="/master/img/aquaicon.png">
-  <link rel="icon" href="/master/img/aquaicon.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/tree/master/img/aquaicon.png">
+  <link rel="icon" href="/tree/master/img/aquaicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
@@ -19,17 +19,17 @@
     <meta name="description" content="阅读了&quot;A Simple Framework for Contrastive Learning of Visual Representation&quot;这篇论文，论文提出了对比学习的一个框架，其中包括Encoder, 基于交叉熵的对比loss和Projection head。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="论文阅读：A Simple Framework for Contrastive Learning of Visual Representations">
-<meta property="og:url" content="https://pandintelli.github.io/master/2022/01/11/SimCLR/index.html">
+<meta property="og:url" content="https://pandintelli.github.io/tree/master/2022/01/11/SimCLR/index.html">
 <meta property="og:site_name" content="Pand&#96;s Blog">
 <meta property="og:description" content="阅读了&quot;A Simple Framework for Contrastive Learning of Visual Representation&quot;这篇论文，论文提出了对比学习的一个框架，其中包括Encoder, 基于交叉熵的对比loss和Projection head。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://pandintelli.github.io/master/index_img/SimCLR.png">
+<meta property="og:image" content="https://pandintelli.github.io/tree/master/index_img/SimCLR.png">
 <meta property="article:published_time" content="2022-01-11T08:37:27.000Z">
 <meta property="article:modified_time" content="2023-04-21T11:53:18.460Z">
 <meta property="article:author" content="Pand">
 <meta property="article:tag" content="Contrastive Learning">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://pandintelli.github.io/master/index_img/SimCLR.png">
+<meta name="twitter:image" content="https://pandintelli.github.io/tree/master/index_img/SimCLR.png">
   
   
   
@@ -57,12 +57,12 @@
 <link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
 
 
-<link  rel="stylesheet" href="/master/css/main.css" />
+<link  rel="stylesheet" href="/tree/master/css/main.css" />
 
 
-  <link id="highlight-css" rel="stylesheet" href="/master/css/highlight.css" />
+  <link id="highlight-css" rel="stylesheet" href="/tree/master/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/master/css/highlight-dark.css" />
+    <link id="highlight-css-dark" rel="stylesheet" href="/tree/master/css/highlight-dark.css" />
   
 
 
@@ -71,15 +71,15 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"pandintelli.github.io","root":"/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/master/local-search.xml"};
+    var CONFIG = {"hostname":"pandintelli.github.io","root":"/tree/master/","version":"1.9.4","typing":{"enable":false,"typeSpeed":50,"cursorChar":"","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/tree/master/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
       Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
     }
   </script>
-  <script  src="/master/js/utils.js" ></script>
-  <script  src="/master/js/color-schema.js" ></script>
+  <script  src="/tree/master/js/utils.js" ></script>
+  <script  src="/tree/master/js/color-schema.js" ></script>
   
 
 
@@ -96,7 +96,7 @@
 <div class="header-inner" style="height: 70vh;">
   <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
-    <a class="navbar-brand" href="/master/">
+    <a class="navbar-brand" href="/tree/master/">
       <strong>Pand`s Blog</strong>
     </a>
 
@@ -115,7 +115,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/">
+              <a class="nav-link" href="/tree/master/">
                 <i class="iconfont icon-home-fill"></i>
                 <span>首页</span>
               </a>
@@ -127,7 +127,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/archives/">
+              <a class="nav-link" href="/tree/master/archives/">
                 <i class="iconfont icon-archive-fill"></i>
                 <span>归档</span>
               </a>
@@ -139,7 +139,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/categories/">
+              <a class="nav-link" href="/tree/master/categories/">
                 <i class="iconfont icon-category-fill"></i>
                 <span>分类</span>
               </a>
@@ -151,7 +151,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/tags/">
+              <a class="nav-link" href="/tree/master/tags/">
                 <i class="iconfont icon-tags-fill"></i>
                 <span>标签</span>
               </a>
@@ -163,7 +163,7 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/master/about/">
+              <a class="nav-link" href="/tree/master/about/">
                 <i class="iconfont icon-user-fill"></i>
                 <span>关于</span>
               </a>
@@ -193,7 +193,7 @@
   
 
 <div id="banner" class="banner" parallax=true
-     style="background: url('/master/img/default.png') no-repeat center center; background-size: cover;">
+     style="background: url('/tree/master/img/default.png') no-repeat center center; background-size: cover;">
   <div class="full-bg-img">
     <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
       <div class="banner-text text-center fade-in-up">
@@ -278,7 +278,7 @@
             
               <div class="markdown-body">
                 
-                <h2 id="Framework"><a href="#Framework" class="headerlink" title="Framework"></a>Framework</h2><img src="Figure2.png" srcset="/master/img/loading.gif" lazyload alt="Framework"/>
+                <h2 id="Framework"><a href="#Framework" class="headerlink" title="Framework"></a>Framework</h2><img src="Figure2.png" srcset="/tree/master/img/loading.gif" lazyload alt="Framework"/>
 
 <ul>
 <li>Data augmentation module</li>
@@ -313,7 +313,7 @@
 <p>功能：对比预测任务 (contrastive prediction task)</p>
 <p>在给定一组包含正样本对 $\widetilde{x}_i$ 和 $\widetilde{x}_j$ 的点集 ${\widetilde{x}_k}$ 中，对比预测的任务是给定 $\widetilde{x}_i$，找出匹配的 $\widetilde{x}_j$。</p>
 <p>SimCLR 中使用的 loss 被称作 NT-Xent (the normalized temperature-scaled cross entropy loss)，其表达式如下：<br>$$<br>\ell_{i,j}&#x3D;-\log\frac{exp(sim(z_i,z_j)&#x2F;\tau)}{\sum_{k&#x3D;1}^{2N}\mathbb{1}_{[k\neq i]}exp(sim(z_i,z_k)&#x2F;\tau)}.<br>$$</p>
-<h2 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h2><img src="Algorithm1.png" srcset="/master/img/loading.gif" lazyload alt="Algorithm"/>
+<h2 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h2><img src="Algorithm1.png" srcset="/tree/master/img/loading.gif" lazyload alt="Algorithm"/>
 
 
 
@@ -331,7 +331,7 @@
 <h2 id="对于对比表示学习的数据增广"><a href="#对于对比表示学习的数据增广" class="headerlink" title="对于对比表示学习的数据增广"></a>对于对比表示学习的数据增广</h2><h3 id="组合的数据增广操作对表示学习很重要"><a href="#组合的数据增广操作对表示学习很重要" class="headerlink" title="组合的数据增广操作对表示学习很重要"></a>组合的数据增广操作对表示学习很重要</h3><p>为了研究独立数据增广操作的影响和组合数据增广操作的重要性，SimCLR 研究者探究了独立数据增广操作下和成对数据增广操作下，SimCLR 框架的表现。</p>
 <p>因为 ImageNet 数据集的图像具有不同的大小，在进行操作的时候总是会进行裁剪和 resize ，为了进行消融实验，SimCLR 研究者采用一种非对称的数据变换：总是先进行随机裁剪和 resize 操作，然后只在一个 branch 上再进行目标变换，从而达到对比目的。</p>
 <p>独立或成对变换的线性估计结果如下图所示：</p>
-<img src="Figure5.png" srcset="/master/img/loading.gif" lazyload alt="Linear evaluation under individual or composition of data augmentations"/>
+<img src="Figure5.png" srcset="/tree/master/img/loading.gif" lazyload alt="Linear evaluation under individual or composition of data augmentations"/>
 
 <p>由上图可以得出结论：<strong>没有一个单独的变换对表示学习来说是充分的</strong>。</p>
 <blockquote>
@@ -341,9 +341,9 @@
 <blockquote>
 <p>We conjecture that one serious issue when using only random cropping as data augmentation is that most patches from an image share a similar color distribution. Neural nets may exploit this shortcut to solve the predictive task. Therefore, it is critical to compose cropping with color distortion in order to learn generalizable features.</p>
 </blockquote>
-<img src="Figure6.png" srcset="/master/img/loading.gif" lazyload alt="Histograms of pixel intensities"/>
+<img src="Figure6.png" srcset="/tree/master/img/loading.gif" lazyload alt="Histograms of pixel intensities"/>
 
-<h3 id="对比学习比监督学习更需要-更强的数据增广"><a href="#对比学习比监督学习更需要-更强的数据增广" class="headerlink" title="对比学习比监督学习更需要 更强的数据增广"></a>对比学习比监督学习更需要 更强的数据增广</h3><img src="Table1.png" srcset="/master/img/loading.gif" lazyload alt="Influence of color distortion"/>
+<h3 id="对比学习比监督学习更需要-更强的数据增广"><a href="#对比学习比监督学习更需要-更强的数据增广" class="headerlink" title="对比学习比监督学习更需要 更强的数据增广"></a>对比学习比监督学习更需要 更强的数据增广</h3><img src="Table1.png" srcset="/tree/master/img/loading.gif" lazyload alt="Influence of color distortion"/>
 
 <p>如上表所示，颜色增广持续提升 SimCLR model 的效果，然而在 Supervised model 上，更强的数据增广反而会使模型的性能降低。</p>
 <p>在这种情况下，AutoAugment (一种使用监督学习的增广策略) 不比简单裁剪+颜色变换的效果要好。</p>
@@ -353,7 +353,7 @@
 <blockquote>
 <p>Unsupervised learning benefits more from bigger models than its supervised counterpart.</p>
 </blockquote>
-<img src="Figure7.png" srcset="/master/img/loading.gif" lazyload alt="Linear evaluation of models with varied depth and width"/>
+<img src="Figure7.png" srcset="/tree/master/img/loading.gif" lazyload alt="Linear evaluation of models with varied depth and width"/>
 
 <h3 id="非线性映射头提升它前一层的表示效果"><a href="#非线性映射头提升它前一层的表示效果" class="headerlink" title="非线性映射头提升它前一层的表示效果"></a>非线性映射头提升它前一层的表示效果</h3><blockquote>
 <p>A nonlinear projection head improves the representation quality of the layer before it.</p>
@@ -369,29 +369,29 @@
 <blockquote>
 <p>The hidden layer before the projection head is a better representation than the layer after.</p>
 </blockquote>
-<img src="Figure8.png" srcset="/master/img/loading.gif" lazyload alt="Influence of different projection heads"/>
+<img src="Figure8.png" srcset="/tree/master/img/loading.gif" lazyload alt="Influence of different projection heads"/>
 
 <p>SimCLR 研究者认为在表示层前使用非线性映射的重要影响是因为由对比损失决定的信息损失。准确地说，$z&#x3D;g(h)$ 移除了对于下游任务重要的某些信息，例如颜色和物件偏移。通过使用非线性变换 $g(\cdot)$，更多的信息可以被保存在 $h$ 层中。为了验证这个猜测，他们做了如下图的实验：</p>
-<img src="Table3.png" srcset="/master/img/loading.gif" lazyload alt="Accuracy of layer before MLPs and after"/>
+<img src="Table3.png" srcset="/tree/master/img/loading.gif" lazyload alt="Accuracy of layer before MLPs and after"/>
 
 <p>实验表明，对于下游任务而言，$h$ 层确实比表示层保留的信息更多，实验效果更好。</p>
 <h2 id="损失函数和Batch-Size"><a href="#损失函数和Batch-Size" class="headerlink" title="损失函数和Batch Size"></a>损失函数和Batch Size</h2><h3 id="Loss-function"><a href="#Loss-function" class="headerlink" title="Loss function"></a>Loss function</h3><p>SimCLR 研究者将 NT-Xent 和其他 loss 进行对比，如下表所示，NT-Xent 性能要好得多。</p>
 <p>表内的 “sh” 指的是semi-hard negative mining。其他的一些 loss function 不根据负样本的 relative hardness 来给出权重，所以必须使用 semi-hard negative mining<a href="#refer-anchor-3"><sup>[3]<sup></a>。</p>
-<img src="Table5.png" srcset="/master/img/loading.gif" lazyload/>
+<img src="Table5.png" srcset="/tree/master/img/loading.gif" lazyload/>
 
 <p>之后 SimCLR 研究者测试了 $\ell_2$ normalization 的重要性 (也就是余弦相似度 vs 点乘) 和 NT-Xent loss 中的 temperature $\tau$ 的选择。结果如上表所示。</p>
 <p>在没有 $\ell_2$ normalization 的条件下，对比任务的准确率更高，但是最终表示的效果更差。</p>
 <h3 id="更大的-batch-sizes-和更多的-epochs-有益于对比学习"><a href="#更大的-batch-sizes-和更多的-epochs-有益于对比学习" class="headerlink" title="更大的 batch sizes 和更多的 epochs 有益于对比学习"></a>更大的 batch sizes 和更多的 epochs 有益于对比学习</h3><p>如下表所示，模型的效果随着 batch size 和 training epoch 的增加不断变好。</p>
-<img src="Figure9.png" srcset="/master/img/loading.gif" lazyload/>
+<img src="Figure9.png" srcset="/tree/master/img/loading.gif" lazyload/>
 
 <p>在对比学习的过程中，更大的 batch size 和更多的 epoch 都意味着会有更多的负样本，因此会改善结果。</p>
 <p>更大的 batch size 在每个 epoch 内会生成更多的负样本，而增加 epoch 相当于在每个 epoch 内会随机生成更多种类的负样本。</p>
 <h2 id="和-SOTA-的对比"><a href="#和-SOTA-的对比" class="headerlink" title="和 SOTA 的对比"></a>和 SOTA 的对比</h2><p>SimCLR 研究者使用三种不同的隐藏的宽度 ($1\times,2\times,4\times$) 进行对比。</p>
 <h3 id="线性估计-Linear-evaluation"><a href="#线性估计-Linear-evaluation" class="headerlink" title="线性估计 (Linear evaluation)"></a>线性估计 (Linear evaluation)</h3><p>比较结果如下图所示。</p>
-<img src="Table6.png" srcset="/master/img/loading.gif" lazyload/>
+<img src="Table6.png" srcset="/tree/master/img/loading.gif" lazyload/>
 
 <h3 id="半监督学习"><a href="#半监督学习" class="headerlink" title="半监督学习"></a>半监督学习</h3><p>SimCLR 使用标签数据集 ILSVRC-12 中训练集采样的 $1%$ 或 $10%$ 进行训练 (对应的每一类有 ~12.8，~128 张图片)。结果如下表所示：</p>
-<img src="Table7.png" srcset="/master/img/loading.gif" lazyload/>
+<img src="Table7.png" srcset="/tree/master/img/loading.gif" lazyload/>
 
 
 
@@ -422,7 +422,7 @@
     
       <span class="category-chain">
         
-  <a href="/master/categories/Paper-Reading/" class="category-chain-item">Paper Reading</a>
+  <a href="/tree/master/categories/Paper-Reading/" class="category-chain-item">Paper Reading</a>
   
   
 
@@ -437,7 +437,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/master/tags/Contrastive-Learning/">#Contrastive Learning</a>
+        <a href="/tree/master/tags/Contrastive-Learning/">#Contrastive Learning</a>
       
     </div>
   
@@ -450,7 +450,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>论文阅读：A Simple Framework for Contrastive Learning of Visual Representations</div>
-      <div>https://pandintelli.github.io/master/2022/01/11/SimCLR/</div>
+      <div>https://pandintelli.github.io/tree/master/2022/01/11/SimCLR/</div>
     </div>
     <div class="license-meta">
       
@@ -494,7 +494,7 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/master/2022/01/13/Pytorch-Tutorial/" title="Pytorch Tutorial">
+                      <a href="/tree/master/2022/01/13/Pytorch-Tutorial/" title="Pytorch Tutorial">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">Pytorch Tutorial</span>
                         <span class="visible-mobile">上一篇</span>
@@ -504,7 +504,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/master/2022/01/09/Blog-Setup/" title="基于Hexo的本地博客搭建">
+                      <a href="/tree/master/2022/01/09/Blog-Setup/" title="基于Hexo的本地博客搭建">
                         <span class="hidden-mobile">基于Hexo的本地博客搭建</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -637,7 +637,7 @@
         >
           
             <span style="visibility: hidden; width: 0">|</span>
-            <img src="/master/img/police_beian.png" srcset="/master/img/loading.gif" lazyload alt="police-icon"/>
+            <img src="/tree/master/img/police_beian.png" srcset="/tree/master/img/loading.gif" lazyload alt="police-icon"/>
           
           <span>川公网安备 51010702002729号</span>
         </a>
@@ -668,15 +668,15 @@
 
 <script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
 <script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
-<script  src="/master/js/events.js" ></script>
-<script  src="/master/js/plugins.js" ></script>
+<script  src="/tree/master/js/events.js" ></script>
+<script  src="/tree/master/js/plugins.js" ></script>
 
 
 
 
 
   
-    <script  src="/master/js/img-lazyload.js" ></script>
+    <script  src="/tree/master/js/img-lazyload.js" ></script>
   
 
 
@@ -818,7 +818,7 @@
 
   <script  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" ></script>
 
-  <script  src="/master/js/local-search.js" ></script>
+  <script  src="/tree/master/js/local-search.js" ></script>
 
 
 
@@ -826,7 +826,7 @@
 
 <!-- 主题的启动项，将它保持在最底部 -->
 <!-- the boot of the theme, keep it at the bottom -->
-<script  src="/master/js/boot.js" ></script>
+<script  src="/tree/master/js/boot.js" ></script>
 
 
   
