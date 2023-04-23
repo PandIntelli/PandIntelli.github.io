@@ -25,7 +25,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://pandintelli.github.io/index_img/MixFormer.png">
 <meta property="article:published_time" content="2022-03-29T07:58:58.000Z">
-<meta property="article:modified_time" content="2023-04-23T07:13:10.137Z">
+<meta property="article:modified_time" content="2023-04-23T07:17:18.641Z">
 <meta property="article:author" content="Pand">
 <meta property="article:tag" content="Transformer">
 <meta property="article:tag" content="Tracking">
@@ -321,7 +321,8 @@
 <p>用$q_t,k_t,v_t$分别表示target template中提取的patch embedding映射后得到的query, key, value，同样地，对搜索区域，用$q_s,k_s,v_s$表示，那么混合attention可以被定义为：<br>$$<br>\begin{aligned}<br>    &amp;k_m&#x3D;Concat(k_t,k_s), v_m&#x3D;Concat(v_t,v_s),\<br>    &amp;\text{Attention}_t&#x3D;\text{Softmax}(\frac{q_tk_m^T}{\sqrt{d}})v_m,\<br>    &amp;\text{Attention}_s&#x3D;\text{Softmax}(\frac{q_sk_m^T}{\sqrt{d}})v_m,<br>\end{aligned}<br>$$<br>这里$d$表示key的维度。$\text{Attention}_t$和$\text{Attention}_s$分别表示target和search的特征映射。</p>
 <p>因为tracking的目的是从search region里搜索出目标，所以对$\text{Attention}_t$来说，完全没必要和完整的$k_m$做注意力计算，只要计算self-attention就行了。</p>
 <p>所以最后的计算公式为：<br>$$<br>\begin{aligned}<br>    &amp;\text{Attention}_t&#x3D;\text{Softmax}(\frac{q_tk_t^T}{\sqrt{d}})v_t,\<br>    &amp;\text{Attention}_s&#x3D;\text{Softmax}(\frac{q_sk_m^T}{\sqrt{d}})v_m.<br>\end{aligned}<br>$$</p>
-<h2 id="训练和推理"><a href="#训练和推理" class="headerlink" title="训练和推理"></a>训练和推理</h2><h3 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h3><p>首先用CVT$^{[4]}$模型去预训练MAM模块，然后再fine-tune整个框架。使用的Loss function为：<br>$$<br>L_{loc}&#x3D;\lambda_{L1}L_1(B_i,\hat{B}<em>i)+\lambda</em>{giou}L_{giou}(B_i,\hat{B}<em>i),<br>$$<br>这里$\lambda</em>{L1}&#x3D;5$, $\lambda_{giou}&#x3D;2$，是两个loss的权重。$B_i$是bounding box的GT，$\hat{B_i}$是预测的bounding box。</p>
+<h2 id="训练和推理"><a href="#训练和推理" class="headerlink" title="训练和推理"></a>训练和推理</h2><h3 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h3><p>首先用CVT$^{[4]}$模型去预训练MAM模块，然后再fine-tune整个框架。使用的Loss function为：<br>$$<br>L_{loc}&#x3D;\lambda_{L1} L_1(B_i,\hat{B}<em>i)+ \lambda</em>{giou}L_{giou}(B_i,\hat{B}_i),<br>$$</p>
+<p>这里$\lambda_{L1}&#x3D;5$, $\lambda_{giou}&#x3D;2$，是两个loss的权重。$B_i$是bounding box的GT，$\hat{B_i}$是预测的bounding box。</p>
 <h3 id="Template-Online-Update"><a href="#Template-Online-Update" class="headerlink" title="Template Online Update"></a>Template Online Update</h3><p>基于模板匹配的Tracking算法的基础思想是：将要跟踪的目标选定并保存作为模板，然后在Tracking的每一帧中找和这个目标最相似的。因此质量差的模板会导致模型追踪性能下降。因此，MixFormer引入了一个分数预测模块 (Score Prediction Module)。</p>
 <img src=".\image-20220329154716436.png" srcset="/img/loading.gif" lazyload/>
 
